@@ -904,6 +904,8 @@ function playNibbles({numPlayers, speed, comp}) {
         function tick(next) {
             if (playerDied) { next(); return; }
 
+            let candyCol = 0;
+            let candyRow = 0;
             if (nonum) {
                 function placeNumber() {
                     const row = Math.floor(Math.random() * (ARENAHEIGHT - 6)) + 5;
@@ -918,6 +920,8 @@ function playNibbles({numPlayers, speed, comp}) {
                 while(pointIsThere(numberPlace.r, numberPlace.c, 0) || pointIsThere(numberPlace.s, numberPlace.c, 0)) {
                     numberPlace = placeNumber();
                 }
+                candyCol = numberPlace.c;
+                candyRow = numberPlace.r;
                 numberRow = arena[numberPlace.r][numberPlace.c].realRow;
                 numberCol = numberPlace.c;
                 nonum = false;
@@ -958,7 +962,22 @@ function playNibbles({numPlayers, speed, comp}) {
 
             for(let a = 1 ; a <= numPlayers ; a++) {
                 if (a > (numPlayers - comp)) {
-                    // TODO Insert computer logic here
+                    if ( (x / 2) - (x >> 1) === 0 ) {
+                        if ( sammy[a].wall = 0 ) {
+                            if ( candyCol > sammy[a].col ) { sammy[a].direction = 4; }
+                            if ( candyCol < sammy[a].col ) { sammy[a].direction = 3; }
+                        }
+                        sammy[a].col2 = sammy[a].col;
+                        sammy[a].row2 = sammy[a].row;
+                    }
+                    if ( (x / 2) - (x >> 1) !== 0 ) {
+                        if ( sammy[a].wall = 0 ) {
+                            if ( candyRow > sammy[a].row ) { sammy[a].direction = 2; }
+                            if ( candyRow < sammy[a].row ) { sammy[a].direction = 1; }
+                        }
+                        sammy[a].col3 = sammy[a].col;
+                        sammy[a].row3 = sammy[a].row
+                    }
                 }
 
                 switch (sammy[a].direction) {
@@ -972,7 +991,33 @@ function playNibbles({numPlayers, speed, comp}) {
                 else if (sammy[a].wall === 1) { sammy[a].wall = 0; }
 
                 if (a > (numPlayers - comp)) {
-                    // TODO Insert computer logic here
+                    if ( pointIsThere(sammy[a].row, sammy[a].col, 0) ) {
+                        if (sammy[a].direction === 1 || sammy[a].direction === 2) {
+                            sammy[a].direction = Math.floor(Math.random() * 2) + 3;
+                            sammy[a].wall = 3;
+                        } else if (sammy[a].direction === 3 || sammy[a].direction === 4) {
+                            sammy[a].direction = Math.floor(Math.random() * 2) + 1;
+                            sammy[a].wall = 3;
+                        }
+                    }
+
+                    if ( sammy[a].direction === 1 || sammy[a].direction === 2 ) {
+                        if (pointIsThere(sammy[a].row, sammy[a].col - 1, 0) || pointIsThere(sammy[a].row, sammy[a].col + 1, 0)) {
+                        } else {
+                            sammy[a].wall = 2;
+                        }
+                    }
+
+                    if ( sammy[a].direction === 3 || sammy[a].direction === 4 ) {
+                        if (pointIsThere(sammy[a].row - 1, sammy[a].col, 0) || pointIsThere(sammy[a].row + 1, sammy[a].col + 1, 0)) {
+                        } else {
+                            sammy[a].wall = 2;
+                        }
+                    }
+
+                    if ( sammy[a].row < 5 || sammy[a].row > 48 || sammy[a].col < 3 || sammy[a].col > 78 ) {
+                        sammy[a].wall = 2;
+                    }
                 }
 
                 if (numberRow === ((sammy[a].row + 1) >> 1) && numberCol === sammy[a].col) {
@@ -1003,7 +1048,45 @@ function playNibbles({numPlayers, speed, comp}) {
             for(let a = 1 ; a <= numPlayers ; a++) {
                 if (pointIsThere2(sammy[a].row, sammy[a].col, 0, sammy[a].direction)) {
                     if (a > (numPlayers - comp)) {
-                        // TODO Insert computer logic here
+                        let choose = Math.floor(Math.random() * 5) + 1;
+                        switch(choose) {
+                            case 1: case 2: case 3:
+                                if ( sammy[a].score > -1 ) {
+                                    sammy[a].row = Math.floor(Math.random() * 40) + 4;
+                                    sammy[a].col = Math.floor(Math.random() * 77) + 2;
+                                    sammy[a].direction = Math.floor(Math.random() * 4) + 1;
+                                    sammy[a].score = sammy[a].score + 1
+                                }
+                                break;
+                            case 4:
+                                if ( sammy[a].score > 2 ) {
+                                    switch(sammy[a].direction) {
+                                        case 1: arena[sammy[a].row - 1][sammy[a].col].acolor = 0; break;
+                                        case 2: arena[sammy[a].row + 1][sammy[a].col].acolor = 0; break;
+                                        case 3: arena[sammy[a].row][sammy[a].col - 1].acolor = 0; break;
+                                        case 4: arena[sammy[a].row][sammy[a].col + 1].acolor = 0; break;
+                                    }
+                                    sammy[a].score = sammy[a].score - 2;
+                                }
+                                break;
+                            case 5:
+                                let r = 0;
+                                if ( sammy[a].score > 3 ) {
+                                    for (let q = 1 ; q <= 8 ; q++) {
+                                        switch(sammy[a].direction) {
+                                            case 1: if ( arena[sammy[a].row - 1][sammy[a].col].acolor = colortable[q] ) { r = q; } break;
+                                            case 2: if ( arena[sammy[a].row + 1][sammy[a].col].acolor = colortable[q] ) { r = q; } break;
+                                            case 3: if ( arena[sammy[a].row][sammy[a].col - 1].acolor = colortable[q] ) { r = q; } break;
+                                            case 4: if ( arena[sammy[a].row][sammy[a].col + 1].acolor = colortable[q] ) { r = q; } break;
+                                        }
+                                    }
+                                    if ( r > 0 && r < 9 ) {
+                                        eraseSnake(sammy, sammyBody, r);
+                                    }
+                                    r = 0;
+                                    sammy[a].score = sammy[a].score - 3;
+                                }
+                        }
                     }
                 }
 
