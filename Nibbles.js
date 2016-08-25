@@ -1,11 +1,3 @@
-/*
- █ === €
-
- ▀ === ﬂ
-
- ▄ === ‹
- */
-
 const U = "▀";
 const L = "▄";
 const S = " ";
@@ -189,7 +181,6 @@ const MAXSNAKELENGTH = 1000;
 const STARTOVER = 1;
 const SAMELEVEL = 2;
 const NEXTLEVEL = 3;
-let curLevel = 1;
 let colortable = [0, 15, 14, 13, 12, 11, 10, 9, 8, 7]; // Filler, Snakes 1-8, Walls
 
 function center (row, fg, bg, text) {
@@ -416,11 +407,10 @@ function initColors() {
     drawBufferToScreen();
 }
 
-function level(whatToDo, comp, numPlayers, sammy) {
-    let curlevel = 1;
+function level(whatToDo, curlevel, comp, numPlayers, sammy) {
     switch(whatToDo) {
         case STARTOVER:
-            curlevel = 1;
+            curlevel = 14;
             break;
         case NEXTLEVEL:
             curlevel++;
@@ -443,7 +433,375 @@ function level(whatToDo, comp, numPlayers, sammy) {
                 set(25, i, colortable[9]);
             }
             break;
-        // TODO CNielsen: Code the rest of the levels
+        case 3:
+            for (let i = 10 ; i <= 40 ; i++) {
+                set(i, 20, colortable[9]);
+                set(i, 60, colortable[9]);
+            }
+            break;
+        case 4:
+            for (let i = 4 ; i <= 30 ; i++) {
+                set(i, 20, colortable[9]);
+                set(53 - i, 60, colortable[9]);
+            }
+            for (let i = 2 ; i <= 40 ; i++) {
+                set(38, i, colortable[9]);
+                set(15, 81 - i, colortable[9]);
+            }
+            break;
+        case 5:
+            for (let i = 13 ; i <= 39 ; i++) {
+                set(i, 21, colortable[9]);
+                set(i, 59, colortable[9]);
+            }
+            for (let i = 23 ; i <= 57 ; i++) {
+                set(11, i, colortable[9]);
+                set(41, i, colortable[9]);
+            }
+            break;
+        case 6:
+            for (let i = 4 ; i <= 49 ; i++) {
+                if (i > 30 || i < 23) {
+                    set(i, 10, colortable[9]);
+                    set(i, 20, colortable[9]);
+                    set(i, 30, colortable[9]);
+                    set(i, 40, colortable[9]);
+                    set(i, 50, colortable[9]);
+                    set(i, 60, colortable[9]);
+                    set(i, 70, colortable[9]);
+                }
+            }
+            break;
+        case 7:
+            for (let i = 4 ; i <= 49 ; i+=2) {
+                set(i, 40, colortable[9]);
+            }
+            break;
+        case 8:
+            for (let i = 4 ; i <= 40 ; i++) {
+                set(i, 10, colortable[9]);
+                set(53 - i, 20, colortable[9]);
+                set(i, 30, colortable[9]);
+                set(53 - i, 40, colortable[9]);
+                set(i, 50, colortable[9]);
+                set(53 - i, 60, colortable[9]);
+                set(i, 70, colortable[9]);
+            }
+            break;
+        case 9:
+            for (let i = 6 ; i <= 47 ; i++) {
+                set(i, i, colortable[9]);
+                set(i, i + 28, colortable[9]);
+            }
+            break;
+        case 10:
+            for (let i = 4 ; i <= 49 ; i+=2) {
+                set(i, 10, colortable[9]);
+                set(i + 1, 20, colortable[9]);
+                set(i, 30, colortable[9]);
+                set(i + 1, 40, colortable[9]);
+                set(i, 50, colortable[9]);
+                set(i + 1, 60, colortable[9]);
+                set(i, 70, colortable[9]);
+            }
+            break;
+        case 11:
+            for (let j = 5 ; j <= 45 ; j+=10) {
+                for (let i = 5 + (j >> 1) ; i <= 48 - (j >> 1) ; i+=10) {
+                    set(i, j, colortable[9]);
+                    set(i, 81 - j, colortable[9]);
+                }
+            }
+            for (let j = 8 ; j <= 36 ; j+=4) {
+                for (let i = -12 + (j * 2.5) ; i <= 92 - (j * 2.5) ; i++) {
+                    set(53 - j, i, colortable[9]);
+                    set(j, i, colortable[9]);
+                }
+            }
+            break;
+        case 12:
+            for (let j = 5 ; j <= 40 ; j+=5) {
+                for (let i = 5 + Math.floor(j / 3) ; i <= 48 - Math.floor(j / 3) ; i++) {
+                    set(i, j, colortable[9]);
+                    set(i, 81 - j, colortable[9]);
+                }
+            }
+            for (let j = 6 ; j <= 12 ; j+=2) {
+                for (let i = -15 + (j * 4) ; i <= 96 - (j * 4) ; i++) {
+                    set(53 - j, i, colortable[9]);
+                    set(j, i, colortable[9]);
+                }
+            }
+            break;
+        case 13:
+            for (let j = 5 ; j <= 48 ; j++) {
+                for (let i = 3; i <= 78 ; i+=2) {
+                    set(j, i, colortable[9]);
+                }
+            }
+            break;
+        case 14:
+            for (let j = 5 ; j <= 48 ; j+=2) {
+                for (let i = 3; i <= 78 ; i++) {
+                    set(j, i, colortable[9]);
+                }
+            }
+            break;
+        case 15: {
+            for (let j = 4 ; j <= 77 ; j++) {
+                if ((j > 10 && j < 14) || (j > 25 && j < 29) || (j > 38 && j < 43) || (j > 51 && j < 55) || (j > 66 && j < 70)) {
+                    set(11, j, colortable[9]);
+                    set(42, j, colortable[9]);
+                } else {
+                    set(6, j, colortable[9]);
+                    set(47, j, colortable[9]);
+                }
+            }
+            for (let j = 6 ; j <= 47 ; j++) {
+                if ((j > 13 && j < 16) || (j > 25 && j < 29) || (j > 37 && j < 40)) {
+                    set(j, 8, colortable[9]);
+                    set(j, 73, colortable[9]);
+                } else {
+                    set(j, 4, colortable[9]);
+                    set(j, 77, colortable[9]);
+                }
+            }
+            let r = 0;
+            for (let q = 1 ; q <= 8 ; q++) {
+                if ( r === 66 ) { r = 70; }
+                if ( r === 55 ) { r = 66; }
+                if ( r === 51 ) { r = 55; }
+                if ( r === 29 ) { r = 51; }
+                if ( r === 25 ) { r = 29; }
+                if ( r === 14 ) { r = 25; }
+                if ( r === 10 ) { r = 14; }
+                if ( r === 0 ) { r = 10; }
+                for (let j = 7 ; j <= 11 ; j++) {
+                    set(j, r, colortable[9]);
+                    set(53 - j, r, colortable[9]);
+                }
+            }
+            for (let j = 4 ; j <= 8 ; j++) {
+                set(13, j, colortable[9]);
+                set(13, 81 - j, colortable[9]);
+                set(16, j, colortable[9]);
+                set(16, 81 - j, colortable[9]);
+                set(37, j, colortable[9]);
+                set(37, 81 - j, colortable[9]);
+                set(40, j, colortable[9]);
+                set(40, 81 - j, colortable[9]);
+            }
+            for (let j = 13 ; j <= 68; j++) {
+                if ((j > 16 && j < 24) || (j > 38 && j < 43) || (j > 57 && j < 64)) {
+                    set(11, j, colortable[9]);
+                    set(42, j, colortable[9]);
+                } else {
+                    set(15, j, colortable[9]);
+                    set(38, j, colortable[9]);
+                }
+            }
+            for (let j = 15 ; j <= 38 ; j++) {
+                if ((j > 18 && j < 23) || (j > 31 && j < 35)) {
+                    set(j, 8, colortable[9]);
+                    set(j, 73, colortable[9]);
+                } else {
+                    set(j, 13, colortable[9]);
+                    set(j, 68, colortable[9]);
+                }
+            }
+            r = 0;
+            for (let q = 1 ; q <= 4 ; q++) {
+                if ( r === 57 ) { r = 64; }
+                if ( r === 23 ) { r = 57; }
+                if ( r === 16 ) { r = 23; }
+                if ( r === 0 ) { r = 16; }
+                for (let j = 11 ; j <= 15 ; j++) {
+                    set(j, r, colortable[9]);
+                    set(53 - j, r, colortable[9]);
+                }
+            }
+            for (let j = 8 ; j <= 12; j++) {
+                set(18, j, colortable[9]);
+                set(18, 81 - j, colortable[9]);
+                set(23, j, colortable[9]);
+                set(23, 81 - j, colortable[9]);
+                set(31, j, colortable[9]);
+                set(31, 81 - j, colortable[9]);
+                set(35, j, colortable[9]);
+                set(35, 81 - j, colortable[9]);
+            }
+            for (let j = 16 ; j <= 65; j++) {
+                if ((j > 38 && j < 43)) {
+                } else {
+                    set(18, j, colortable[9]);
+                    set(35, j, colortable[9]);
+                }
+            }
+            for (let j = 18 ; j <= 35; j++) {
+                set(j, 16, colortable[9]);
+                set(j, 65, colortable[9]);
+            }
+            for (let j = 38 ; j <= 43; j++) {
+                set(27, j, colortable[9]);
+            }
+            for (let j = 25 ; j <= 29; j++) {
+                set(j, 40, colortable[9]);
+                set(j, 41, colortable[9]);
+            }
+            for (let r = 18 ; r <= 38; r+=2) {
+                for (let j = 20; j <= 33; j++) {
+                    if ((j > 26 && j < 28)) {
+                    } else {
+                        set(j, r, colortable[9]);
+                    }
+                }
+            }
+            for (let r = 43 ; r <= 65; r+=2) {
+                for (let j = 20; j <= 33; j++) {
+                    if ((j > 26 && j < 28)) {
+                    } else {
+                        set(j, r, colortable[9]);
+                    }
+                }
+            }
+            break;
+        }
+        case 16: {
+            for (let j = 4 ; j <= 77 ; j++) {
+                if ((j > 10 && j < 14) || (j > 25 && j < 29) || (j > 38 && j < 43) || (j > 51 && j < 55) || (j > 66 && j < 70)) {
+                    set(11, j, colortable[9]);
+                    set(42, j, colortable[9]);
+                } else {
+                    set(6, j, colortable[9]);
+                    set(47, j, colortable[9]);
+                }
+            }
+            for (let j = 6 ; j <= 47 ; j++) {
+                if ((j > 13 && j < 16) || (j > 25 && j < 29) || (j > 37 && j < 40)) {
+                    set(j, 8, colortable[9]);
+                    set(j, 73, colortable[9]);
+                } else {
+                    set(j, 4, colortable[9]);
+                    set(j, 77, colortable[9]);
+                }
+            }
+            let r = 0;
+            for (let q = 1 ; q <= 8; q++) {
+                if ( r === 66 ) { r = 70; }
+                if ( r === 55 ) { r = 66; }
+                if ( r === 51 ) { r = 55; }
+                if ( r === 29 ) { r = 51; }
+                if ( r === 25 ) { r = 29; }
+                if ( r === 14 ) { r = 25; }
+                if ( r === 10 ) { r = 14; }
+                if ( r === 0 ) { r = 10; }
+                for (let j = 7 ; j <= 11 ; j++) {
+                    set(j, r, colortable[9]);
+                    set(53 - j, r, colortable[9]);
+                }
+            }
+            for (let j = 4 ; j <= 8; j++) {
+                set(13, j, colortable[9]);
+                set(13, 81 - j, colortable[9]);
+                set(16, j, colortable[9]);
+                set(16, 81 - j, colortable[9]);
+                set(37, j, colortable[9]);
+                set(37, 81 - j, colortable[9]);
+                set(40, j, colortable[9]);
+                set(40, 81 - j, colortable[9]);
+            }
+            for (let j = 13 ; j <= 68 ; j++) {
+                if ((j > 16 && j < 24) || (j > 38 && j < 43) || (j > 57 && j < 64)) {
+                    set(11, j, colortable[9]);
+                    set(42, j, colortable[9]);
+                } else {
+                    set(15, j, colortable[9]);
+                    set(38, j, colortable[9]);
+                }
+            }
+            for (let j = 15 ; j <= 38 ; j++) {
+                if ((j > 18 && j < 23) || (j > 31 && j < 35)) {
+                    set(j, 8, colortable[9]);
+                    set(j, 73, colortable[9]);
+                } else {
+                    set(j, 13, colortable[9]);
+                    set(j, 68, colortable[9]);
+                }
+            }
+            r = 0;
+            for (let q = 1 ; q <= 4 ; q++) {
+                if ( r === 57 ) { r = 64; }
+                if ( r === 23 ) { r = 57; }
+                if ( r === 16 ) { r = 23; }
+                if ( r === 0 ) { r = 16; }
+                for (let j = 11 ; j <= 15 ; j++) {
+                    set(j, r, colortable[9]);
+                    set(53 - j, r, colortable[9]);
+                }
+            }
+            for (let j = 8 ; j <= 12 ; j++) {
+                set(18, j, colortable[9]);
+                set(18, 81 - j, colortable[9]);
+                set(23, j, colortable[9]);
+                set(23, 81 - j, colortable[9]);
+                set(31, j, colortable[9]);
+                set(31, 81 - j, colortable[9]);
+                set(35, j, colortable[9]);
+                set(35, 81 - j, colortable[9]);
+            }
+            for (let j = 16 ; j <= 65 ; j++) {
+                if ((j > 38 && j < 43)) {
+                } else {
+                    set(18, j, colortable[9]);
+                    set(35, j, colortable[9]);
+                }
+            }
+            for (let j = 18 ; j <= 35 ; j++) {
+                set(j, 16, colortable[9]);
+                set(j, 65, colortable[9]);
+            }
+            for (let j = 18 ; j <= 63 ; j++) {
+                set(27, j, colortable[9]);
+            }
+            for (let j = 23 ; j <= 31 ; j++) {
+                set(j, 40, colortable[9]);
+                set(j, 41, colortable[9]);
+            }
+
+            for (let j = 20 ; j <= 33 ; j++) {
+                if ((j > 25 && j < 29)) {
+                } else {
+                    set(j, 38, colortable[9]);
+                    set(j, 43, colortable[9]);
+                }
+            }
+            for (let j = 18 ; j <= 63 ; j++) {
+                if ((j > 38 && j < 43)) {
+                } else {
+                    set(20, j, colortable[9]);
+                    set(25, j, colortable[9]);
+                    set(29, j, colortable[9]);
+                    set(33, j, colortable[9]);
+                }
+            }
+            for (let j = 1 ; j <= 50 ; j++) {
+                let q = 26;
+                while ( (q > 25 && q < 29) ) {
+                    q = Math.floor(Math.random() * 13) + 20;
+                }
+                let r = 40;
+                while ( (r > 38 && r < 43) ) {
+                    r = Math.floor(Math.random() * 45) + 18
+                }
+                set(q, r, colortable[9]);
+            }
+            break;
+        }
+        default:
+            for (let i = 1 ; i <= (curlevel - 15) * 100 ; i++) {
+                set(Math.floor(Math.random() * 46) + 4, Math.floor(Math.random() * 79) + 1, colortable[9]);
+            }
+            break;
     }
 
     for(let a = 1 ; a <= numPlayers ; a++) {
@@ -508,6 +866,7 @@ function pointIsThere2(row, col, c, d) {
 }
 
 function playNibbles({numPlayers, speed, comp}) {
+    const CANDIESTOLEVELUP = 2;
     let x = -1;
     const sammyBody =[];
     const sammy = [];
@@ -530,10 +889,7 @@ function playNibbles({numPlayers, speed, comp}) {
         };
     }
 
-    let curlevel = level(STARTOVER, comp, numPlayers, sammy);
-    let curSpeed = speed;
-
-    let gameOver = false;
+    let curlevel = level(STARTOVER, 1, comp, numPlayers, sammy);
 
     function play() {
         if(sammy[1].lives === 0 || (sammy[2] && sammy[2].lives === 0)) { return; }
@@ -565,7 +921,8 @@ function playNibbles({numPlayers, speed, comp}) {
                 numberRow = arena[numberPlace.r][numberPlace.c].realRow;
                 numberCol = numberPlace.c;
                 nonum = false;
-                text(numberRow, numberCol, FG[Math.floor(Math.random() * 7) + 9], BG[0], "@");  // TODO CNielsen: Randomize "Candy" character
+                // TODO Tinclon: Randomize "Candy" character
+                text(numberRow, numberCol, FG[Math.floor(Math.random() * 7) + 9], BG[0], "@");
                 drawBufferToScreen();
             }
 
@@ -583,7 +940,7 @@ function playNibbles({numPlayers, speed, comp}) {
                 case "k": case "K": if (sammy[1].direction !== 1) { sammy[1].direction = 2; } break;
                 case "j": case "J": if (sammy[1].direction !== 4) { sammy[1].direction = 3; } break;
                 case "l": case "L": if (sammy[1].direction !== 3) { sammy[1].direction = 4; } break;
-                // TODO CNielsen: Insert all the fun stuff here
+                // TODO Tinclon: Insert all the fun stuff here
             }
 
             for (let q = 1 ; q < numPlayers ; q++) {
@@ -629,15 +986,14 @@ function playNibbles({numPlayers, speed, comp}) {
                     sammy[a].score = sammy[a].score + number;
                     text(1, a * 8, FG[colortable[a]], BG[0], "" + sammy[a].score);
                     number++;
-                    if (number === 15) {
+                    if (number === CANDIESTOLEVELUP) {
                         for (let b = 1 ; b <= numPlayers ; b++) {
                             eraseSnake(sammy, sammyBody, b);
                         }
-                        curlevel = level(NEXTLEVEL, comp, numPlayers, sammy);
-                        // TODO SpacePause
-                        if (numPlayers === 1) { sammy[2].row = 0; }
-                        number = 1;
+                        curlevel = level(NEXTLEVEL, curlevel, comp, numPlayers, sammy);
                         speed = speed - 10;
+                        spacePause(`     Level ${curlevel},  Push Space`, play);
+                        return;
                     }
                     nonum = true;
                     if(speed < 1) { speed = 1; }
@@ -703,7 +1059,7 @@ function playNibbles({numPlayers, speed, comp}) {
             }
             if (pause) {
                 spacePause(" -- Someone Died! Push Space -- ", () => {
-                    curlevel = level(SAMELEVEL, comp, numPlayers, sammy);
+                    curlevel = level(SAMELEVEL, curlevel, comp, numPlayers, sammy);
                     play();
                 });
             } else {
