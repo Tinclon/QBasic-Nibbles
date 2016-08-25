@@ -410,7 +410,7 @@ function initColors() {
 function level(whatToDo, curlevel, comp, numPlayers, sammy) {
     switch(whatToDo) {
         case STARTOVER:
-            curlevel = 14;
+            curlevel = 1;
             break;
         case NEXTLEVEL:
             curlevel++;
@@ -866,7 +866,7 @@ function pointIsThere2(row, col, c, d) {
 }
 
 function playNibbles({numPlayers, speed, comp}) {
-    const CANDIESTOLEVELUP = 2;
+    const CANDIESTOLEVELUP = 15;
     let x = -1;
     const sammyBody =[];
     const sammy = [];
