@@ -954,6 +954,7 @@ function playNibbles({numPlayers, speed, comp}) {
             }
 
             let kbd = inkey();
+            let a = 0;
             switch(kbd) {
                 case "t": case "T": if (sammy[3] && sammy[3].direction !== 2) { sammy[3].direction = 1; } break;
                 case "g": case "G": if (sammy[3] && sammy[3].direction !== 1) { sammy[3].direction = 2; } break;
@@ -967,10 +968,94 @@ function playNibbles({numPlayers, speed, comp}) {
                 case "k": case "K": if (sammy[1] && sammy[1].direction !== 1) { sammy[1].direction = 2; } break;
                 case "j": case "J": if (sammy[1] && sammy[1].direction !== 4) { sammy[1].direction = 3; } break;
                 case "l": case "L": if (sammy[1] && sammy[1].direction !== 3) { sammy[1].direction = 4; } break;
-                // TODO Tinclon: Insert all the fun stuff here
+
+                case "p": case "P": spacePause(" Game Paused ... Push Space  ", tick); return;
+
+                case " ": nonum = true; break;
+                case "q": case "Q": case "r": case "R": case "u": case "U":
+                    switch(kbd) {
+                        case "q": case "Q": a = 2; break;
+                        case "r": case "R": a = 3; break;
+                        case "u": case "U": a = 1; break;
+                    }
+                    if (sammy[a] && sammy[a].score > 1) {
+                        sammy[a].score = sammy[a].score - 1;
+                        sammy[a].row = Math.floor(Math.random() * 40) + 4;
+                        sammy[a].col = Math.floor(Math.random() * 77) + 2;
+                        sammy[a].direction = Math.floor(Math.random() * 4) + 1;
+                    }
+                    break;
+                case "e": case "E": case "y": case "Y": case "o": case "O":
+                    switch(kbd) {
+                        case "e": case "E": a = 2; break;
+                        case "y": case "Y": a = 3; break;
+                        case "o": case "O": a = 1; break;
+                    }
+                    if (sammy[a] && sammy[a].score > 2) {
+                        switch(sammy[a].direction) {
+                            case 1: arena[sammy[a].row - 1][sammy[a].col].acolor = 0; break;
+                            case 2: arena[sammy[a].row + 1][sammy[a].col].acolor = 0; break;
+                            case 3: arena[sammy[a].row][sammy[a].col - 1].acolor = 0; break;
+                            case 4: arena[sammy[a].row][sammy[a].col + 1].acolor = 0; break;
+                       }
+                       sammy[a].score = sammy[a].score - 2;
+                    }
+                    break;
+                case "z": case "Z": case "v": case "V": case "m": case "M":
+                    switch(kbd) {
+                        case "z": case "Z": a = 2; break;
+                        case "v": case "V": a = 3; break;
+                        case "m": case "M": a = 1; break;
+                    }
+                    let r = 0;
+                    if (sammy[a] && sammy[a].score > 3 ) {
+                        for (let q = 1 ; q <= numPlayers ; q++) {
+                            switch(sammy[a].direction) {
+                                case 1: if ( arena[sammy[a].row - 1][sammy[a].col].acolor = colortable[q] ) { r = q; } break;
+                                case 2: if ( arena[sammy[a].row + 1][sammy[a].col].acolor = colortable[q] ) { r = q; } break;
+                                case 3: if ( arena[sammy[a].row][sammy[a].col - 1].acolor = colortable[q] ) { r = q; } break;
+                                case 4: if ( arena[sammy[a].row][sammy[a].col + 1].acolor = colortable[q] ) { r = q; } break;
+                            }
+                        }
+                        if (r > 0 && r <= numPlayers) {
+                           eraseSnake(sammy, sammyBody, r);
+                        }
+                        sammy[a].score = sammy[a].score - 3;
+                    }
+                   break;
+                case "x": case "X": case "b": case "B": case ",":
+                    switch(kbd) {
+                        case "x": case "X": a = 2; break;
+                        case "b": case "B": a = 3; break;
+                        case ",": a = 1; break;
+                    }
+
+                    if (sammy[a] && sammy[a].score > 4) {
+                        for (let q = 1 ; q <= numPlayers ; q++) {
+                            if ( q !== a ) { sammy[q].row = Math.floor(Math.random() * 40) + 4; }
+                            if ( q !== a ) { sammy[q].col = Math.floor(Math.random() * 77) + 2; }
+                            if ( q !== a ) { sammy[q].direction = Math.floor(Math.random() * 4) + 1; }
+                        }
+                        sammy[a].score = sammy[a].score - 1;
+                    }
+                    break;
+                case "c": case "C": case "n": case "N": case ".":
+                    switch(kbd) {
+                        case "c": case "C": a = 2; break;
+                        case "n": case "N": a = 3; break;
+                        case ".": a = 1; break;
+                    }
+
+                    if (sammy[a] && sammy[a].score > 5) {
+                        sammy[a].row = candyRow + Math.floor(Math.random() * 2) + 1;
+                        sammy[a].col = candyCol + Math.floor(Math.random() * 2) + 1;
+                        sammy[a].direction = Math.floor(Math.random() * 4) + 1;
+                        sammy[a].score = sammy[a].score - 5;
+                    }
+                    break;
             }
 
-            for (let q = 1 ; q < numPlayers ; q++) {
+            for (let q = 1 ; q <= numPlayers ; q++) {
                 if (sammy[q].row < 4) { sammy[q].row = 4; }
                 if (sammy[q].row > ARENAHEIGHT - 1) { sammy[q].row = ARENAHEIGHT - 1; }
                 if (sammy[q].col < 2) { sammy[q].col = 2; }
