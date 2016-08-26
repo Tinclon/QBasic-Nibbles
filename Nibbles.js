@@ -165,17 +165,18 @@ function drawBufferToScreen() {
         // Populate the document body for the first time
         let screenText = "";
         for (let row = 1; row <= HEIGHT; row++) {
+            screenText += "<div style='line-height:0'>";
             for (let col = 1; col <= WIDTH; col++) {
-                screenText += `<span id="${row}:${col}" style="color:rgb(${buffer[row][col].foreground});background:rgb(${buffer[row][col].background})">${buffer[row][col].character}</span>`;
+                screenText += `<span style="color:rgb(${buffer[row][col].foreground});background:rgb(${buffer[row][col].background})">${buffer[row][col].character}</span>`;
             }
-            screenText += "\n";
+            screenText += "</div>\n";
         }
         document.body.innerHTML = screenText;
     } else {
         for (let row = 1; row <= HEIGHT; row++) {
             for (let col = 1; col <= WIDTH; col++) {
                 if (screenBuffer[row][col] !== buffer[row][col]) {
-                    let e = document.body.querySelector(`[id="${row}:${col}"]`);
+                    let e = document.body.children[row-1].children[col-1];
                     e.setAttribute("style",`color:rgb(${buffer[row][col].foreground});background:rgb(${buffer[row][col].background})`);
                     e.innerHTML = buffer[row][col].character;
                 }
