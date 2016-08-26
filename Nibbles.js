@@ -147,6 +147,7 @@ document.body.style = `${fonts[2]};white-space:pre;letter-spacing:-0.008em;`;
 document.addEventListener("keydown", keydown);
 
 const buffer = [];
+const screenBuffer = [];
 function fillBuffer (fg, bg) {
     for (let row = 1 ; row <= HEIGHT ; row++) {
         buffer[row] = [];
@@ -160,14 +161,32 @@ function fillBuffer (fg, bg) {
     }
 }
 function drawBufferToScreen() {
-    let screenText = "";
-    for (let row = 1 ; row <= HEIGHT ; row++) {
-        for (let col = 1 ; col <= WIDTH ; col++) {
-            screenText += `<span style="color:rgb(${buffer[row][col].foreground});background:rgb(${buffer[row][col].background})">${buffer[row][col].character}</span>`;
+    if(screenBuffer.length === 0) {
+        // Populate the document body for the first time
+        let screenText = "";
+        for (let row = 1; row <= HEIGHT; row++) {
+            for (let col = 1; col <= WIDTH; col++) {
+                screenText += `<span id="${row}:${col}" style="color:rgb(${buffer[row][col].foreground});background:rgb(${buffer[row][col].background})">${buffer[row][col].character}</span>`;
+            }
+            screenText += "\n";
         }
-        screenText += "\n";
+        document.body.innerHTML = screenText;
+    } else {
+        for (let row = 1; row <= HEIGHT; row++) {
+            for (let col = 1; col <= WIDTH; col++) {
+                if (screenBuffer[row][col] !== buffer[row][col]) {
+                    let e = document.body.querySelector(`[id="${row}:${col}"]`);
+                    e.setAttribute("style",`color:rgb(${buffer[row][col].foreground});background:rgb(${buffer[row][col].background})`);
+                    e.innerHTML = `${buffer[row][col].character}`;
+                }
+            }
+        }
     }
-    document.body.innerHTML = screenText;
+
+    // Update screenBuffer
+    for (let row = 1 ; row <= HEIGHT ; row++) {
+        screenBuffer[row] = Array.from(buffer[row]);
+    }
 }
 
 
@@ -813,7 +832,7 @@ function level(whatToDo, curlevel, comp, numPlayers, sammy) {
 }
 
 function eraseSnake(snake, snakeBody, snakeNum) {
-    for (let c = 0 ; c <= 9 ; c++) {
+    for (let c = 1 ; c <= 8 ; c++) {
         for (let b = snake[snakeNum].length - c ; b >= 0 ; b-= 10) {
             let tail = (snake[snakeNum].head + MAXSNAKELENGTH - b) % MAXSNAKELENGTH;
             set(snakeBody[snakeNum][tail].row, snakeBody[snakeNum][tail].col, 0);
@@ -898,14 +917,15 @@ function playNibbles({numPlayers, speed, comp}) {
         let numberCol = -1;
         let nonum = true;
         let playerDied = false;
+        let candyCol = 0;
+        let candyRow = 0;
+
         text(1, (numPlayers + 1) * 8, FG[numPlayers + 1], BG[0], "" + curlevel);
         drawBufferToScreen();
 
         function tick(next) {
             if (playerDied) { next(); return; }
 
-            let candyCol = 0;
-            let candyRow = 0;
             if (nonum) {
                 function placeNumber() {
                     const row = Math.floor(Math.random() * (ARENAHEIGHT - 6)) + 5;
@@ -952,29 +972,30 @@ function playNibbles({numPlayers, speed, comp}) {
                 if (sammy[q].row > ARENAHEIGHT - 1) { sammy[q].row = ARENAHEIGHT - 1; }
                 if (sammy[q].col < 2) { sammy[q].col = 2; }
                 if (sammy[q].col > ARENAWIDTH - 1) { sammy[q].col = ARENAWIDTH - 1; }
-                text(1, q * 8, FG[q], BG[0], "" + sammy[q].score);
-                drawBufferToScreen();
+                text(1, q * 8, FG[sammy[q].scolor], BG[0], "" + sammy[q].score);
             }
 
-            // TODO What is this here for?
+            // TODO What is this here for? Just for AI making decisions?
             x++;
             if(x > 10000) { x = 0; }
 
             for(let a = 1 ; a <= numPlayers ; a++) {
                 if (a > (numPlayers - comp)) {
-                    if ( (x / 2) - (x >> 1) === 0 ) {
-                        if ( sammy[a].wall = 0 ) {
+                    // TODO  === AI ===
+                    if ( (x % 2) === 0 ) {
+                        if ( sammy[a].wall === 0 ) {
                             if ( candyCol > sammy[a].col ) { sammy[a].direction = 4; }
                             if ( candyCol < sammy[a].col ) { sammy[a].direction = 3; }
                         }
+                        // TODO What is this here for?
                         sammy[a].col2 = sammy[a].col;
                         sammy[a].row2 = sammy[a].row;
-                    }
-                    if ( (x / 2) - (x >> 1) !== 0 ) {
-                        if ( sammy[a].wall = 0 ) {
+                    } else {
+                        if ( sammy[a].wall === 0 ) {
                             if ( candyRow > sammy[a].row ) { sammy[a].direction = 2; }
                             if ( candyRow < sammy[a].row ) { sammy[a].direction = 1; }
                         }
+                        // TODO What is this here for?
                         sammy[a].col3 = sammy[a].col;
                         sammy[a].row3 = sammy[a].row
                     }
@@ -987,11 +1008,12 @@ function playNibbles({numPlayers, speed, comp}) {
                     case 4: if(!pointIsThere(sammy[a].row, sammy[a].col + 1, 0)) { sammy[a].col = sammy[a].col + 1; } break;
                 }
 
+                if (sammy[a].wall === 1) { sammy[a].wall = 0; }
                 if (sammy[a].wall === 2) { sammy[a].wall = 1; }
-                else if (sammy[a].wall === 1) { sammy[a].wall = 0; }
 
                 if (a > (numPlayers - comp)) {
-                    if ( pointIsThere(sammy[a].row, sammy[a].col, 0) ) {
+                    // TODO  === AI ===
+                    if ( pointIsThere(sammy[a].row, sammy[a].col, 0) || sammy[a].wall === 3) {
                         if (sammy[a].direction === 1 || sammy[a].direction === 2) {
                             sammy[a].direction = Math.floor(Math.random() * 2) + 3;
                             sammy[a].wall = 3;
@@ -999,24 +1021,24 @@ function playNibbles({numPlayers, speed, comp}) {
                             sammy[a].direction = Math.floor(Math.random() * 2) + 1;
                             sammy[a].wall = 3;
                         }
-                    }
 
-                    if ( sammy[a].direction === 1 || sammy[a].direction === 2 ) {
-                        if (pointIsThere(sammy[a].row, sammy[a].col - 1, 0) || pointIsThere(sammy[a].row, sammy[a].col + 1, 0)) {
-                        } else {
+                        if (sammy[a].direction === 1 || sammy[a].direction === 2) {
+                            if (pointIsThere(sammy[a].row, sammy[a].col - 1, 0) || pointIsThere(sammy[a].row, sammy[a].col + 1, 0)) {
+                            } else {
+                                sammy[a].wall = 2;
+                            }
+                        }
+
+                        if (sammy[a].direction === 3 || sammy[a].direction === 4) {
+                            if (pointIsThere(sammy[a].row - 1, sammy[a].col, 0) || pointIsThere(sammy[a].row + 1, sammy[a].col + 1, 0)) {
+                            } else {
+                                sammy[a].wall = 2;
+                            }
+                        }
+
+                        if (sammy[a].row < 5 || sammy[a].row > 48 || sammy[a].col < 3 || sammy[a].col > 78) {
                             sammy[a].wall = 2;
                         }
-                    }
-
-                    if ( sammy[a].direction === 3 || sammy[a].direction === 4 ) {
-                        if (pointIsThere(sammy[a].row - 1, sammy[a].col, 0) || pointIsThere(sammy[a].row + 1, sammy[a].col + 1, 0)) {
-                        } else {
-                            sammy[a].wall = 2;
-                        }
-                    }
-
-                    if ( sammy[a].row < 5 || sammy[a].row > 48 || sammy[a].col < 3 || sammy[a].col > 78 ) {
-                        sammy[a].wall = 2;
                     }
                 }
 
@@ -1048,14 +1070,15 @@ function playNibbles({numPlayers, speed, comp}) {
             for(let a = 1 ; a <= numPlayers ; a++) {
                 if (pointIsThere2(sammy[a].row, sammy[a].col, 0, sammy[a].direction)) {
                     if (a > (numPlayers - comp)) {
+                        // TODO  === AI ===
                         let choose = Math.floor(Math.random() * 5) + 1;
                         switch(choose) {
                             case 1: case 2: case 3:
-                                if ( sammy[a].score > -1 ) {
+                                if ( sammy[a].score > 0 ) {
                                     sammy[a].row = Math.floor(Math.random() * 40) + 4;
                                     sammy[a].col = Math.floor(Math.random() * 77) + 2;
                                     sammy[a].direction = Math.floor(Math.random() * 4) + 1;
-                                    sammy[a].score = sammy[a].score + 1
+                                    sammy[a].score = sammy[a].score - 1
                                 }
                                 break;
                             case 4:
