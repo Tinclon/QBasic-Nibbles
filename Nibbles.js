@@ -389,7 +389,7 @@ function getInputs(next) {
                 getSkillLevel(next);
                 return;
             }
-            speed = (TICK / intInput);
+            speed = (TICK / intInput) + 25;
             next();
         });
     }
@@ -832,7 +832,7 @@ function level(whatToDo, curlevel, comp, numPlayers, sammy) {
 }
 
 function eraseSnake(snake, snakeBody, snakeNum) {
-    for (let c = 1 ; c <= 8 ; c++) {
+    for (let c = 0 ; c <= 9 ; c++) {
         for (let b = snake[snakeNum].length - c ; b >= 0 ; b-= 10) {
             let tail = (snake[snakeNum].head + MAXSNAKELENGTH - b) % MAXSNAKELENGTH;
             set(snakeBody[snakeNum][tail].row, snakeBody[snakeNum][tail].col, 0);
@@ -1103,7 +1103,7 @@ function playNibbles({numPlayers, speed, comp}) {
                                             case 4: if ( arena[sammy[a].row][sammy[a].col + 1].acolor = colortable[q] ) { r = q; } break;
                                         }
                                     }
-                                    if ( r > 0 && r < 9 ) {
+                                    if ( r > 0 && r <= numPlayers ) {
                                         eraseSnake(sammy, sammyBody, r);
                                     }
                                     r = 0;
