@@ -389,7 +389,7 @@ function getInputs(next) {
                 getSkillLevel(next);
                 return;
             }
-            speed = (TICK / intInput) + 25;
+            speed = Math.max(0, TICK - (intInput >> 1)) >> 1;
             next();
         });
     }
@@ -824,7 +824,8 @@ function level(whatToDo, curlevel, comp, numPlayers, sammy) {
     }
 
     for(let a = 1 ; a <= numPlayers ; a++) {
-        text(1, a * 8, FG[colortable[a]], BG[0], "" + sammy[a].score);
+        text(1, a * 8, FG[sammy[a].scolor], BG[0], "  ");
+        text(1, a * 8, FG[sammy[a].scolor], BG[0], "" + sammy[a].score);
     }
     drawBufferToScreen();
 
@@ -952,18 +953,18 @@ function playNibbles({numPlayers, speed, comp}) {
 
             let kbd = inkey();
             switch(kbd) {
-                case "w": case "W": if (sammy[3].direction !== 2) { sammy[3].direction = 1; } break;
-                case "s": case "S": if (sammy[3].direction !== 1) { sammy[3].direction = 2; } break;
-                case "a": case "A": if (sammy[3].direction !== 4) { sammy[3].direction = 3; } break;
-                case "d": case "D": if (sammy[3].direction !== 3) { sammy[3].direction = 4; } break;
-                case "t": case "T": if (sammy[2].direction !== 2) { sammy[2].direction = 1; } break;
-                case "g": case "G": if (sammy[2].direction !== 1) { sammy[2].direction = 2; } break;
-                case "f": case "F": if (sammy[2].direction !== 4) { sammy[2].direction = 3; } break;
-                case "h": case "H": if (sammy[2].direction !== 3) { sammy[2].direction = 4; } break;
-                case "i": case "I": if (sammy[1].direction !== 2) { sammy[1].direction = 1; } break;
-                case "k": case "K": if (sammy[1].direction !== 1) { sammy[1].direction = 2; } break;
-                case "j": case "J": if (sammy[1].direction !== 4) { sammy[1].direction = 3; } break;
-                case "l": case "L": if (sammy[1].direction !== 3) { sammy[1].direction = 4; } break;
+                case "t": case "T": if (sammy[3] && sammy[3].direction !== 2) { sammy[3].direction = 1; } break;
+                case "g": case "G": if (sammy[3] && sammy[3].direction !== 1) { sammy[3].direction = 2; } break;
+                case "f": case "F": if (sammy[3] && sammy[3].direction !== 4) { sammy[3].direction = 3; } break;
+                case "h": case "H": if (sammy[3] && sammy[3].direction !== 3) { sammy[3].direction = 4; } break;
+                case "w": case "W": if (sammy[2] && sammy[2].direction !== 2) { sammy[2].direction = 1; } break;
+                case "s": case "S": if (sammy[2] && sammy[2].direction !== 1) { sammy[2].direction = 2; } break;
+                case "a": case "A": if (sammy[2] && sammy[2].direction !== 4) { sammy[2].direction = 3; } break;
+                case "d": case "D": if (sammy[2] && sammy[2].direction !== 3) { sammy[2].direction = 4; } break;
+                case "i": case "I": if (sammy[1] && sammy[1].direction !== 2) { sammy[1].direction = 1; } break;
+                case "k": case "K": if (sammy[1] && sammy[1].direction !== 1) { sammy[1].direction = 2; } break;
+                case "j": case "J": if (sammy[1] && sammy[1].direction !== 4) { sammy[1].direction = 3; } break;
+                case "l": case "L": if (sammy[1] && sammy[1].direction !== 3) { sammy[1].direction = 4; } break;
                 // TODO Tinclon: Insert all the fun stuff here
             }
 
@@ -972,6 +973,7 @@ function playNibbles({numPlayers, speed, comp}) {
                 if (sammy[q].row > ARENAHEIGHT - 1) { sammy[q].row = ARENAHEIGHT - 1; }
                 if (sammy[q].col < 2) { sammy[q].col = 2; }
                 if (sammy[q].col > ARENAWIDTH - 1) { sammy[q].col = ARENAWIDTH - 1; }
+                text(1, q * 8, FG[sammy[q].scolor], BG[0], "  ");
                 text(1, q * 8, FG[sammy[q].scolor], BG[0], "" + sammy[q].score);
             }
 
@@ -1013,7 +1015,7 @@ function playNibbles({numPlayers, speed, comp}) {
 
                 if (a > (numPlayers - comp)) {
                     // TODO  === AI ===
-                    if ( pointIsThere(sammy[a].row, sammy[a].col, 0) || sammy[a].wall === 3) {
+                    if ( pointIsThere(sammy[a].row, sammy[a].col, 0) || (sammy[a].wall === 3 && (x % 3) === 0)) {
                         if (sammy[a].direction === 1 || sammy[a].direction === 2) {
                             sammy[a].direction = Math.floor(Math.random() * 2) + 3;
                             sammy[a].wall = 3;
@@ -1059,7 +1061,11 @@ function playNibbles({numPlayers, speed, comp}) {
                         }
                         curlevel = level(NEXTLEVEL, curlevel, comp, numPlayers, sammy);
                         speed = speed - 10;
-                        spacePause(`     Level ${curlevel},  Push Space`, play);
+                        if (numPlayers === comp) {
+                            play();
+                        } else {
+                            spacePause(`     Level ${curlevel},  Push Space`, play);
+                        }
                         return;
                     }
                     nonum = true;
