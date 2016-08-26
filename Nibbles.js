@@ -177,7 +177,7 @@ function drawBufferToScreen() {
                 if (screenBuffer[row][col] !== buffer[row][col]) {
                     let e = document.body.querySelector(`[id="${row}:${col}"]`);
                     e.setAttribute("style",`color:rgb(${buffer[row][col].foreground});background:rgb(${buffer[row][col].background})`);
-                    e.innerHTML = `${buffer[row][col].character}`;
+                    e.innerHTML = buffer[row][col].character;
                 }
             }
         }
@@ -977,13 +977,11 @@ function playNibbles({numPlayers, speed, comp}) {
                 text(1, q * 8, FG[sammy[q].scolor], BG[0], "" + sammy[q].score);
             }
 
-            // TODO What is this here for? Just for AI making decisions?
             x++;
             if(x > 10000) { x = 0; }
 
             for(let a = 1 ; a <= numPlayers ; a++) {
                 if (a > (numPlayers - comp)) {
-                    // TODO  === AI ===
                     if ( (x % 2) === 0 ) {
                         if ( sammy[a].wall === 0 ) {
                             if ( candyCol > sammy[a].col ) { sammy[a].direction = 4; }
@@ -1014,7 +1012,6 @@ function playNibbles({numPlayers, speed, comp}) {
                 if (sammy[a].wall === 2) { sammy[a].wall = 1; }
 
                 if (a > (numPlayers - comp)) {
-                    // TODO  === AI ===
                     if ( pointIsThere(sammy[a].row, sammy[a].col, 0) || (sammy[a].wall === 3 && (x % 3) === 0)) {
                         if (sammy[a].direction === 1 || sammy[a].direction === 2) {
                             sammy[a].direction = Math.floor(Math.random() * 2) + 3;
@@ -1076,7 +1073,6 @@ function playNibbles({numPlayers, speed, comp}) {
             for(let a = 1 ; a <= numPlayers ; a++) {
                 if (pointIsThere2(sammy[a].row, sammy[a].col, 0, sammy[a].direction)) {
                     if (a > (numPlayers - comp)) {
-                        // TODO  === AI ===
                         let choose = Math.floor(Math.random() * 5) + 1;
                         switch(choose) {
                             case 1: case 2: case 3:
