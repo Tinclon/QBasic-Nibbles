@@ -844,7 +844,8 @@ function eraseSnake(snake, snakeBody, snakeNum) {
 }
 
 function pointIsThere(row, col, acolor) {
-    if (row !== 0) {
+    if (row > 0 && row <= ARENAHEIGHT &&
+        col > 0 && col <= ARENAWIDTH) {
         if (arena[row][col].acolor !== acolor) {
             return true;
         }
@@ -855,30 +856,30 @@ function pointIsThere(row, col, acolor) {
 function pointIsThere2(row, col, c, d) {
     switch(d) {
         case 1:
-            if (arena[row - 1][col].acolor !== c &&
-                arena[row][col - 1].acolor !== c &&
-                arena[row][col + 1].acolor !== c) {
+            if ((row > 1 && arena[row - 1][col].acolor !== c) &&
+                (col > 1 && arena[row][col - 1].acolor !== c) &&
+                (col < ARENAWIDTH && arena[row][col + 1].acolor !== c)) {
                 return true;
             }
             break;
         case 2:
-            if (arena[row + 1][col].acolor !== c &&
-                arena[row][col - 1].acolor !== c &&
-                arena[row][col + 1].acolor !== c) {
+            if ((row < ARENAHEIGHT && arena[row + 1][col].acolor !== c) &&
+                (col > 1 && arena[row][col - 1].acolor !== c) &&
+                (col < ARENAWIDTH && arena[row][col + 1].acolor !== c)) {
                 return true;
             }
             break;
         case 3:
-            if (arena[row + 1][col].acolor !== c &&
-                arena[row - 1][col].acolor !== c &&
-                arena[row][col - 1].acolor !== c) {
+            if ((row < ARENAHEIGHT && arena[row + 1][col].acolor !== c) &&
+                (row > 1 && arena[row - 1][col].acolor !== c) &&
+                (col > 1 && arena[row][col - 1].acolor !== c)) {
                 return true;
             }
             break;
         case 4:
-            if (arena[row + 1][col].acolor !== c &&
-                arena[row - 1][col].acolor !== c &&
-                arena[row][col + 1].acolor !== c) {
+            if ((row < ARENAHEIGHT && arena[row + 1][col].acolor !== c) &&
+                (row > 1 && arena[row - 1][col].acolor !== c) &&
+                (col < ARENAHEIGHT && arena[row][col + 1].acolor !== c)) {
                 return true;
             }
             break;
