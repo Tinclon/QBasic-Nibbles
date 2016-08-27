@@ -1269,24 +1269,25 @@ function playNibbles({numPlayers, speed, comp}) {
 function intro() {
     fillBuffer(FG[15], BG[0]);
 
-    center(4, FG[15], BG[0], "Q B a s i c   N i b b l e s");
-    center(8, FG[7], BG[0], "Nibbles is a game for one to eight players.  Navigate your snakes");
-    center(9, FG[7], BG[0], "around the game board trying to eat up numbers. The more numbers you eat");
-    center(10, FG[7], BG[0], "up, the more points you gain and the longer you snake becomes.");
-    center(11, FG[7], BG[0], "With more points you have more special functions available to you.");
-    center(14, FG[7], BG[0], "  Keys             Descriptions (Points)             Player Centres (5) ");
-    center(15, FG[7], BG[0], "╔═════╗                                                                 ");
-    center(16, FG[7], BG[0], "║1 2 3║   1 = Random Warp  (1)  6 = RIGHT        (0)    1  --  5        ");
-    center(17, FG[7], BG[0], "║     ║   2 = UP           (0)  7 = Erase Snake  (3)    2  --  S        ");
-    center(18, FG[7], BG[0], "║4 5 6║   3 = Pass Through (2)  8 = Warp Others  (1)    3  --  G        ");
-    center(19, FG[7], BG[0], "║     ║   4 = LEFT         (0)  9 = Warp Near    (5)    4  --  K        ");
-    center(20, FG[7], BG[0], "║7 8 9║   5 = DOWN         (0)                                          ");
-    center(21, FG[7], BG[0], "╚═════╝                                                                 ");
+    center(3, FG[15], BG[0], "Q B a s i c   N i b b l e s");
+    center(7, FG[7], BG[0], "Nibbles is a game for one to eight players.  Navigate your snakes");
+    center(8, FG[7], BG[0], "around the game board trying to eat up numbers. The more numbers you eat");
+    center(9, FG[7], BG[0], "up, the more points you gain and the longer you snake becomes.");
+    center(10, FG[7], BG[0], "With more points you have more special functions available to you.");
+
+    center(13, FG[7], BG[0], "  Keys    Descriptions (Points)    Player 1   Player 2   Player 3       ");
+    center(14, FG[7], BG[0], "╔═════╗                                                                 ");
+    center(15, FG[7], BG[0], "║1 ▲ 2║   1 = Random Warp  (1)      ╔═════╗    ╔═════╗    ╔═════╗       ");
+    center(16, FG[7], BG[0], "║     ║   2 = Pass Through (2)      ║U I O║    ║Q W E║    ║R T Y║       ");
+    center(17, FG[7], BG[0], "║◄ ▼ ►║   3 = Erase Snake  (3)      ║J K L║    ║A S D║    ║F G H║       ");
+    center(18, FG[7], BG[0], "║     ║   4 = Warp Others  (1)      ║M , .║    ║Z X C║    ║V B N║       ");
+    center(19, FG[7], BG[0], "║3 4 5║   5 = Warp Near    (5)      ╚═════╝    ╚═════╝    ╚═════╝       ");
+    center(20, FG[7], BG[0], "╚═════╝                                                                 ");
     center(24, FG[7], BG[0], "Press any key to continue");
 
     for (let a = 1 ; a <= 8 ; a++) {
-        buffer[13][a * 7] = {
-            character: "█",
+        buffer[5][a * 7 + 7] = {
+            character: B,
             foreground: FG[colortable[a]],
             background: BG[0]
         };
