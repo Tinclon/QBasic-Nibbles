@@ -1141,7 +1141,7 @@ function playNibbles({numPlayers, speed, comp}) {
                             eraseSnake(sammy, sammyBody, b);
                         }
                         curlevel = level(NEXTLEVEL, curlevel, comp, numPlayers, sammy);
-                        speed = speed - 10;
+                        speed = speed - 2;
                         if (numPlayers === comp) {
                             play();
                         } else {
