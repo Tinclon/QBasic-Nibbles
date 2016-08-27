@@ -46,6 +46,13 @@ const HEIGHT = 25;
 var BLANKLINE = new Array(WIDTH + 1).join(" ");
 let keyboardQueue = [];
 
+/*
+    Display the given label at the given row and column, in the given foreground and background color,
+    and blink a cursor while awaiting user input.
+
+    Send the entire input to the callback function when the user presses Enter
+
+ */
 function input(row, col, fg, bg, label, inputCallback) {
     let queuedInput = "";
     let cursorIndex = label.length + 1;
@@ -95,6 +102,16 @@ function input(row, col, fg, bg, label, inputCallback) {
     gatherInput();
 }
 
+/*
+    Get the next keyboard input
+
+    If no callback or key is specified, will return immediately with the next key in the keyboard buffer if one is available.
+
+    If a callback is specified, will wait until a key is available in the keyboard buffer and return the key to the callback.
+
+    If a callback and a key is specified, will wait until the specified key is pressed, and then return the key to the callback.
+ */
+
 function inkey(callback, key) {
     if(callback) {
         if (keyboardQueue.length > 0) {
@@ -104,13 +121,13 @@ function inkey(callback, key) {
                     queuedKey = keyboardQueue.shift();
                 }
                 if (queuedKey === key) {
-                    callback();
+                    callback(queuedKey);
                     return;
                 }
             } else {
                 let queuedKey = keyboardQueue.shift();
                 if (queuedKey !== "Meta") {
-                    callback();
+                    callback(queuedKey);
                 } else {
                     inkey(callback, key);
                 }
@@ -148,18 +165,26 @@ document.addEventListener("keydown", keydown);
 
 const buffer = [];
 const screenBuffer = [];
-function fillBuffer (fg, bg) {
+
+/*
+    Fills the buffer with specified character (ie clear screen)
+ */
+function fillBuffer (fg, bg, c = S) {
     for (let row = 1 ; row <= HEIGHT ; row++) {
         buffer[row] = [];
         for (let col = 1 ; col <= WIDTH ; col++) {
             buffer[row][col] = {
-                character: S,
+                character: c,
                 foreground: fg,
                 background: bg
             };
         }
     }
 }
+
+/*
+    Pushes the buffer to the screen. Takes advantage of double buffering.
+ */
 function drawBufferToScreen() {
     if(screenBuffer.length === 0) {
         // Populate the document body for the first time
@@ -201,6 +226,9 @@ const SAMELEVEL = 2;
 const NEXTLEVEL = 3;
 let colortable = [0, 15, 14, 13, 12, 11, 10, 9, 8, 7]; // Filler, Snakes 1-8, Walls
 
+/*
+     Centers the specified text, in the given color, to the specified row in the buffer.
+ */
 function center (row, fg, bg, text) {
     const x = (WIDTH >> 1) - (text.length >> 1);
     for (let i = 0 ; i < text.length ; i++) {
@@ -212,6 +240,9 @@ function center (row, fg, bg, text) {
     }
 }
 
+/*
+    Populates the given text to the buffer at the row, col, and color provided.
+ */
 function text (row, col, fg, bg, text) {
     for (let i = 0 ; i < text.length ; i++) {
         buffer[row][col+i] = {
@@ -222,6 +253,9 @@ function text (row, col, fg, bg, text) {
     }
 }
 
+/*
+    Sets the arena's row and col to the given color index
+ */
 function set (row, col, acolor) {
     if (row !== 0) {
         arena[row][col].acolor = acolor;
