@@ -191,7 +191,6 @@ function drawBufferToScreen() {
 }
 
 
-
 // ======= DONE WITH SETUP. START PROGRAM ========= //
 const arena = [];
 const ARENAHEIGHT = HEIGHT * 2;
