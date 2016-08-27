@@ -1306,7 +1306,7 @@ function intro() {
     center(3, FG[15], BG[0], "Q B a s i c   N i b b l e s");
     center(7, FG[7], BG[0], "Nibbles is a game for one to eight players.  Navigate your snakes");
     center(8, FG[7], BG[0], "around the game board trying to eat up candies. The more candies you eat");
-    center(9, FG[7], BG[0], "up, the more points you gain and the longer you snake becomes.");
+    center(9, FG[7], BG[0], "up, the more points you gain and the longer your snake becomes.");
     center(10, FG[7], BG[0], "With more points you have more special functions available to you.");
 
     center(13, FG[7], BG[0], "  Keys    Descriptions (Points)    Player 1   Player 2   Player 3       ");
