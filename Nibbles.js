@@ -948,8 +948,7 @@ function playNibbles({numPlayers, speed, comp}) {
                 numberRow = arena[numberPlace.r][numberPlace.c].realRow;
                 numberCol = numberPlace.c;
                 nonum = false;
-                // TODO Tinclon: Randomize "Candy" character
-                text(numberRow, numberCol, FG[Math.floor(Math.random() * 7) + 9], BG[0], "@");
+                text(numberRow, numberCol, FG[Math.floor(Math.random() * 7) + 9], BG[0], "☼");
                 drawBufferToScreen();
             }
 
