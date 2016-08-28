@@ -78,7 +78,7 @@ function input(row, col, fg, bg, label, inputCallback) {
                 if (keyboardQueue[0] === "Backspace") {
                     keyboardQueue.shift();
                     queuedInput = queuedInput.slice(0, -1);
-                } else if (keyboardQueue[0] === "Meta") {
+                } else if (keyboardQueue[0].length !== 1) {
                     keyboardQueue.shift();
                 } else {
                     queuedInput += keyboardQueue.shift();
@@ -126,7 +126,7 @@ function inkey(callback, key) {
                 }
             } else {
                 let queuedKey = keyboardQueue.shift();
-                if (queuedKey !== "Meta") {
+                if (queuedKey.length === 1) {
                     callback(queuedKey);
                 } else {
                     inkey(callback, key);
