@@ -858,9 +858,19 @@ function level(whatToDo, curlevel, comp, numPlayers, sammy) {
             break;
     }
 
+    let bg = 0, maxScore = 0, r = 0;
+    for(let q = 1 ; q <= numPlayers ; q++) {
+        if (sammy[q].score > maxScore) {
+            maxScore = sammy[q].score;
+            r = q;
+        }
+    }
+
     for(let a = 1 ; a <= numPlayers ; a++) {
-        text(1, a * 8, FG[sammy[a].scolor], BG[0], "  ");
-        text(1, a * 8, FG[sammy[a].scolor], BG[0], "" + sammy[a].score);
+        bg = 0;
+        if (r === a) {bg = 2;}
+        text(1, a * 8 - 1, FG[sammy[a].scolor], BG[bg], "    ");
+        text(1, a * 8, FG[sammy[a].scolor], BG[bg], "" + sammy[a].score);
     }
     drawBufferToScreen();
 
@@ -1125,17 +1135,27 @@ function playNibbles({numPlayers, speed, comp}) {
                     break;
             }
 
+            let bg = 0, maxScore = 0, r = 0;
+            for(let q = 1 ; q <= numPlayers ; q++) {
+                if (sammy[q].score > maxScore) {
+                    maxScore = sammy[q].score;
+                    r = q;
+                }
+            }
+
             for (let q = 1 ; q <= numPlayers ; q++) {
+                bg = 0;
+                if (r === q) {bg = 2;}
                 if (sammy[q].row < 4) { sammy[q].row = 4; }
                 if (sammy[q].row > ARENAHEIGHT - 1) { sammy[q].row = ARENAHEIGHT - 1; }
                 if (sammy[q].col < 2) { sammy[q].col = 2; }
                 if (sammy[q].col > ARENAWIDTH - 1) { sammy[q].col = ARENAWIDTH - 1; }
-                text(1, q * 8, FG[sammy[q].scolor], BG[0], "  ");
-                text(1, q * 8, FG[sammy[q].scolor], BG[0], "" + sammy[q].score);
+                text(1, q * 8 - 1, FG[sammy[q].scolor], BG[bg], "    ");
+                text(1, q * 8, FG[sammy[q].scolor], BG[bg], "" + sammy[q].score);
             }
 
             x++;
-            if(x > 500) {
+            if(x > 10) {
                 clearHeatMap();
                 buildHeatMap({row: candyRow, col: candyCol, val: 0});
                 x = 0;
@@ -1169,7 +1189,22 @@ function playNibbles({numPlayers, speed, comp}) {
                         }
                     }
                     sammy[a].score = sammy[a].score + number;
-                    text(1, a * 8, FG[colortable[a]], BG[0], "" + sammy[a].score);
+
+                    let bg = 0, maxScore = 0, r = 0;
+                    for(let q = 1 ; q <= numPlayers ; q++) {
+                        if (sammy[q].score > maxScore) {
+                            maxScore = sammy[q].score;
+                            r = q;
+                        }
+                    }
+
+                    for(let s = 1 ; s <= numPlayers ; s++) {
+                        bg = 0;
+                        if (r === s) { bg = 2; }
+                        text(1, a * 8 - 1, FG[sammy[s].scolor], BG[bg], "    ");
+                        text(1, a * 8, FG[colortable[s]], BG[bg], "" + sammy[s].score);
+                    }
+
                     number++;
                     if (number === CANDIESTOLEVELUP) {
                         for (let b = 1 ; b <= numPlayers ; b++) {
@@ -1189,16 +1224,17 @@ function playNibbles({numPlayers, speed, comp}) {
                 }
             }
 
+            const useSpecialPointMultiplier = Math.floor(Math.random() * 1000) + 1;
             for(let a = 1 ; a <= numPlayers ; a++) {
                 if (a > (numPlayers - comp)) {  // AI Special Moves.
 
-                    if (sammy[a].score > 5 && heatMap[sammy[a].row][sammy[a].col] > 150) {
+                    if (sammy[a].score > (5 * useSpecialPointMultiplier) && heatMap[sammy[a].row][sammy[a].col] > 150) {
                         // We're beyond the edge of the map. Try a warp-near
                         sammy[a].row = candyRow + Math.floor(Math.random() * 2) + 1;
                         sammy[a].col = candyCol + Math.floor(Math.random() * 2) + 1;
                         sammy[a].direction = Math.floor(Math.random() * 4) + 1;
                         sammy[a].score = sammy[a].score - 5;
-                    } else if (sammy[a].score > 3 && pointIsThere2(sammy[a].row, sammy[a].col, 0, sammy[a].direction)) {
+                    } else if (sammy[a].score > (3 * useSpecialPointMultiplier) && pointIsThere2(sammy[a].row, sammy[a].col, 0, sammy[a].direction)) {
                         // Sammy is surrounded. Erase a snake
                         let r = 0;
                         for (let q = 1 ; q <= 8 ; q++) {
@@ -1223,13 +1259,13 @@ function playNibbles({numPlayers, speed, comp}) {
                             case 4: if(pointIsThere(sammy[a].row, sammy[a].col + 1, 0)) { somethingIsInTheWay = true; } break;
                         }
                         if(somethingIsInTheWay && (Math.random() < 0.2)) {
-                            if (sammy[a].score > 0 && heatMap[sammy[a].row][sammy[a].col] > 60) {
+                            if (sammy[a].score > (1 * useSpecialPointMultiplier) && heatMap[sammy[a].row][sammy[a].col] > 60) {
                                 // Random Warp
                                 sammy[a].row = Math.floor(Math.random() * 40) + 4;
                                 sammy[a].col = Math.floor(Math.random() * 77) + 2;
                                 sammy[a].direction = Math.floor(Math.random() * 4) + 1;
                                 sammy[a].score = sammy[a].score - 1;
-                            } else if (sammy[a].score > 2 && heatMap[sammy[a].row][sammy[a].col] > 20) {
+                            } else if (sammy[a].score > (2 * useSpecialPointMultiplier) && heatMap[sammy[a].row][sammy[a].col] > 20) {
                                 // Pass through
                                 switch(sammy[a].direction) {
                                     case 1: arena[sammy[a].row - 1][sammy[a].col].acolor = 0; break;
