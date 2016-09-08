@@ -1198,7 +1198,6 @@ function playNibbles({numPlayers, speed, comp}) {
                         sammy[a].col = candyCol + Math.floor(Math.random() * 2) + 1;
                         sammy[a].direction = Math.floor(Math.random() * 4) + 1;
                         sammy[a].score = sammy[a].score - 5;
-                        console.log("Sammy " + a + " is trying to warp-near");
                     } else if (sammy[a].score > 3 && pointIsThere2(sammy[a].row, sammy[a].col, 0, sammy[a].direction)) {
                         // Sammy is surrounded. Erase a snake
                         let r = 0;
@@ -1215,7 +1214,6 @@ function playNibbles({numPlayers, speed, comp}) {
                         }
                         r = 0;
                         sammy[a].score = sammy[a].score - 3;
-                        console.log("Sammy " + a + " is trying to erase a snake");
                     } else {
                         let somethingIsInTheWay = false;
                         switch (sammy[a].direction) {
@@ -1231,7 +1229,6 @@ function playNibbles({numPlayers, speed, comp}) {
                                 sammy[a].col = Math.floor(Math.random() * 77) + 2;
                                 sammy[a].direction = Math.floor(Math.random() * 4) + 1;
                                 sammy[a].score = sammy[a].score - 1;
-                                console.log("Sammy " + a + " is trying a random warp");
                             } else if (sammy[a].score > 2 && heatMap[sammy[a].row][sammy[a].col] > 20) {
                                 // Pass through
                                 switch(sammy[a].direction) {
@@ -1241,7 +1238,6 @@ function playNibbles({numPlayers, speed, comp}) {
                                     case 4: arena[sammy[a].row][sammy[a].col + 1].acolor = 0; break;
                                 }
                                 sammy[a].score = sammy[a].score - 2;
-                                console.log("Sammy " + a + " is trying to pass through");
                             }
                         }
                     }
