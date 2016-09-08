@@ -217,6 +217,7 @@ function drawBufferToScreen() {
 
 // ======= DONE WITH SETUP. START PROGRAM ========= //
 const arena = [];
+const heatMap = [];
 const ARENAHEIGHT = HEIGHT * 2;
 const ARENAWIDTH = WIDTH;
 const MAXPLAYERS = 8;
@@ -370,6 +371,7 @@ function drawScreen() {
 
     for (let row = 1 ; row <= ARENAHEIGHT ; row++) {
         arena[row] = [];
+        heatMap[row] = [];
         for (let col = 1 ; col <= ARENAWIDTH ; col++) {
             arena[row][col] = {
                 realRow: (row + 1) >> 1,
@@ -919,6 +921,41 @@ function pointIsThere2(row, col, c, d) {
     return false
 }
 
+function clearHeatMap() {
+    for (let row = 1; row <= ARENAHEIGHT; row++) {
+        heatMap[row] = [];
+    }
+}
+
+function buildHeatMap(heat, heatQueue) {
+    if(!heatQueue) { heatQueue = [heat]; heatMap[heat.row][heat.col] = heat.val}
+    function buildNext(row, col, val) {
+        if(row > 0 && col > 0 && row <= ARENAHEIGHT && col <= ARENAWIDTH) {
+            let valAdd = 1;
+            if (arena[row][col].acolor === 7) { valAdd = 75; }         // Walls are hard to get through
+            else if (arena[row][col].acolor !== 0) { valAdd = 25; }     // Snakes, less so
+            if (heatMap[row][col] === undefined || heatMap[row][col] > val + valAdd) {
+                heatMap[row][col] = val + valAdd;
+                return {row: row, col: col, val: val + valAdd};
+            }
+        }
+        return null;
+    }
+    function lookAround(heatQueue, heat) {
+        heatQueue.push(buildNext(heat.row + 1, heat.col, heat.val));
+        heatQueue.push(buildNext(heat.row - 1, heat.col, heat.val));
+        heatQueue.push(buildNext(heat.row, heat.col + 1, heat.val));
+        heatQueue.push(buildNext(heat.row, heat.col - 1, heat.val));
+    }
+
+    while(heatQueue.length > 0) {
+        heat = heatQueue.shift();
+        if(heat !== null) {
+            lookAround(heatQueue, heat);
+        }
+    }
+}
+
 function playNibbles({numPlayers, speed, comp}) {
     const CANDIESTOLEVELUP = 15;
     let x = -1;
@@ -980,6 +1017,8 @@ function playNibbles({numPlayers, speed, comp}) {
                 numberRow = arena[numberPlace.r][numberPlace.c].realRow;
                 numberCol = numberPlace.c;
                 nonum = false;
+                clearHeatMap();
+                buildHeatMap({row: candyRow, col: candyCol, val: 0});
                 text(numberRow, numberCol, FG[Math.floor(Math.random() * 7) + 9], BG[0], "☼");
                 drawBufferToScreen();
             }
@@ -1042,10 +1081,10 @@ function playNibbles({numPlayers, speed, comp}) {
                     if (sammy[a] && sammy[a].score > 3 ) {
                         for (let q = 1 ; q <= numPlayers ; q++) {
                             switch(sammy[a].direction) {
-                                case 1: if ( arena[sammy[a].row - 1][sammy[a].col].acolor = colortable[q] ) { r = q; } break;
-                                case 2: if ( arena[sammy[a].row + 1][sammy[a].col].acolor = colortable[q] ) { r = q; } break;
-                                case 3: if ( arena[sammy[a].row][sammy[a].col - 1].acolor = colortable[q] ) { r = q; } break;
-                                case 4: if ( arena[sammy[a].row][sammy[a].col + 1].acolor = colortable[q] ) { r = q; } break;
+                                case 1: if ( arena[sammy[a].row - 1][sammy[a].col].acolor === colortable[q] ) { r = q; } break;
+                                case 2: if ( arena[sammy[a].row + 1][sammy[a].col].acolor === colortable[q] ) { r = q; } break;
+                                case 3: if ( arena[sammy[a].row][sammy[a].col - 1].acolor === colortable[q] ) { r = q; } break;
+                                case 4: if ( arena[sammy[a].row][sammy[a].col + 1].acolor === colortable[q] ) { r = q; } break;
                             }
                         }
                         if (r > 0 && r <= numPlayers) {
@@ -1096,27 +1135,20 @@ function playNibbles({numPlayers, speed, comp}) {
             }
 
             x++;
-            if(x > 10000) { x = 0; }
+            if(x > 500) {
+                clearHeatMap();
+                buildHeatMap({row: candyRow, col: candyCol, val: 0});
+                x = 0;
+            }
 
             for(let a = 1 ; a <= numPlayers ; a++) {
-                if (a > (numPlayers - comp)) {
-                    if ( (x % 2) === 0 ) {
-                        if ( sammy[a].wall === 0 ) {
-                            if ( candyCol > sammy[a].col ) { sammy[a].direction = 4; }
-                            if ( candyCol < sammy[a].col ) { sammy[a].direction = 3; }
-                        }
-                        // TODO What is this here for?
-                        sammy[a].col2 = sammy[a].col;
-                        sammy[a].row2 = sammy[a].row;
-                    } else {
-                        if ( sammy[a].wall === 0 ) {
-                            if ( candyRow > sammy[a].row ) { sammy[a].direction = 2; }
-                            if ( candyRow < sammy[a].row ) { sammy[a].direction = 1; }
-                        }
-                        // TODO What is this here for?
-                        sammy[a].col3 = sammy[a].col;
-                        sammy[a].row3 = sammy[a].row
-                    }
+                if (a > (numPlayers - comp)) { // AI
+                    let possibleMoves = [];
+                    if(heatMap[sammy[a].row - 1][sammy[a].col] < heatMap[sammy[a].row][sammy[a].col]) { possibleMoves.push(1); }
+                    if(heatMap[sammy[a].row + 1][sammy[a].col] < heatMap[sammy[a].row][sammy[a].col]) { possibleMoves.push(2); }
+                    if(heatMap[sammy[a].row][sammy[a].col - 1] < heatMap[sammy[a].row][sammy[a].col]) { possibleMoves.push(3); }
+                    if(heatMap[sammy[a].row][sammy[a].col + 1] < heatMap[sammy[a].row][sammy[a].col]) { possibleMoves.push(4); }
+                    sammy[a].direction = possibleMoves[Math.floor(Math.random() * possibleMoves.length)];
                 }
 
                 switch (sammy[a].direction) {
@@ -1126,40 +1158,9 @@ function playNibbles({numPlayers, speed, comp}) {
                     case 4: if(!pointIsThere(sammy[a].row, sammy[a].col + 1, 0)) { sammy[a].col = sammy[a].col + 1; } break;
                 }
 
-                if (sammy[a].wall === 1) { sammy[a].wall = 0; }
-                if (sammy[a].wall === 2) { sammy[a].wall = 1; }
-
-                if (a > (numPlayers - comp)) {
-                    if ( pointIsThere(sammy[a].row, sammy[a].col, 0) || (sammy[a].wall === 3 && (x % 3) === 0)) {
-                        if (sammy[a].direction === 1 || sammy[a].direction === 2) {
-                            sammy[a].direction = Math.floor(Math.random() * 2) + 3;
-                            sammy[a].wall = 3;
-                        } else if (sammy[a].direction === 3 || sammy[a].direction === 4) {
-                            sammy[a].direction = Math.floor(Math.random() * 2) + 1;
-                            sammy[a].wall = 3;
-                        }
-
-                        if (sammy[a].direction === 1 || sammy[a].direction === 2) {
-                            if (pointIsThere(sammy[a].row, sammy[a].col - 1, 0) || pointIsThere(sammy[a].row, sammy[a].col + 1, 0)) {
-                            } else {
-                                sammy[a].wall = 2;
-                            }
-                        }
-
-                        if (sammy[a].direction === 3 || sammy[a].direction === 4) {
-                            if (pointIsThere(sammy[a].row - 1, sammy[a].col, 0) || pointIsThere(sammy[a].row + 1, sammy[a].col + 1, 0)) {
-                            } else {
-                                sammy[a].wall = 2;
-                            }
-                        }
-
-                        if (sammy[a].row < 5 || sammy[a].row > 48 || sammy[a].col < 3 || sammy[a].col > 78) {
-                            sammy[a].wall = 2;
-                        }
-                    }
-                }
-
                 if (numberRow === ((sammy[a].row + 1) >> 1) && numberCol === sammy[a].col) {
+                    // Candy hit. Yum.
+
                     if (sammy[a].length < (MAXSNAKELENGTH - 500)) {
                         sammy[a].length = sammy[a].length + number * (numPlayers * 5);
                         sammy[a].scolor = colortable[a];
@@ -1189,46 +1190,59 @@ function playNibbles({numPlayers, speed, comp}) {
             }
 
             for(let a = 1 ; a <= numPlayers ; a++) {
-                if (pointIsThere2(sammy[a].row, sammy[a].col, 0, sammy[a].direction)) {
-                    if (a > (numPlayers - comp)) {
-                        let choose = Math.floor(Math.random() * 5) + 1;
-                        switch(choose) {
-                            case 1: case 2: case 3:
-                                if ( sammy[a].score > 0 ) {
-                                    sammy[a].row = Math.floor(Math.random() * 40) + 4;
-                                    sammy[a].col = Math.floor(Math.random() * 77) + 2;
-                                    sammy[a].direction = Math.floor(Math.random() * 4) + 1;
-                                    sammy[a].score = sammy[a].score - 1
+                if (a > (numPlayers - comp)) {  // AI Special Moves.
+
+                    if (sammy[a].score > 5 && heatMap[sammy[a].row][sammy[a].col] > 150) {
+                        // We're beyond the edge of the map. Try a warp-near
+                        sammy[a].row = candyRow + Math.floor(Math.random() * 2) + 1;
+                        sammy[a].col = candyCol + Math.floor(Math.random() * 2) + 1;
+                        sammy[a].direction = Math.floor(Math.random() * 4) + 1;
+                        sammy[a].score = sammy[a].score - 5;
+                        console.log("Sammy " + a + " is trying to warp-near");
+                    } else if (sammy[a].score > 3 && pointIsThere2(sammy[a].row, sammy[a].col, 0, sammy[a].direction)) {
+                        // Sammy is surrounded. Erase a snake
+                        let r = 0;
+                        for (let q = 1 ; q <= 8 ; q++) {
+                            switch(sammy[a].direction) {
+                                case 1: if ( arena[sammy[a].row - 1][sammy[a].col].acolor === colortable[q] ) { r = q; } break;
+                                case 2: if ( arena[sammy[a].row + 1][sammy[a].col].acolor === colortable[q] ) { r = q; } break;
+                                case 3: if ( arena[sammy[a].row][sammy[a].col - 1].acolor === colortable[q] ) { r = q; } break;
+                                case 4: if ( arena[sammy[a].row][sammy[a].col + 1].acolor === colortable[q] ) { r = q; } break;
+                            }
+                        }
+                        if ( r > 0 && r <= numPlayers ) {
+                            eraseSnake(sammy, sammyBody, r);
+                        }
+                        r = 0;
+                        sammy[a].score = sammy[a].score - 3;
+                        console.log("Sammy " + a + " is trying to erase a snake");
+                    } else {
+                        let somethingIsInTheWay = false;
+                        switch (sammy[a].direction) {
+                            case 1: if(pointIsThere(sammy[a].row - 1, sammy[a].col, 0)) { somethingIsInTheWay = true; } break;
+                            case 2: if(pointIsThere(sammy[a].row + 1, sammy[a].col, 0)) { somethingIsInTheWay = true; } break;
+                            case 3: if(pointIsThere(sammy[a].row, sammy[a].col - 1, 0)) { somethingIsInTheWay = true; } break;
+                            case 4: if(pointIsThere(sammy[a].row, sammy[a].col + 1, 0)) { somethingIsInTheWay = true; } break;
+                        }
+                        if(somethingIsInTheWay && (Math.random() < 0.2)) {
+                            if (sammy[a].score > 0 && heatMap[sammy[a].row][sammy[a].col] > 60) {
+                                // Random Warp
+                                sammy[a].row = Math.floor(Math.random() * 40) + 4;
+                                sammy[a].col = Math.floor(Math.random() * 77) + 2;
+                                sammy[a].direction = Math.floor(Math.random() * 4) + 1;
+                                sammy[a].score = sammy[a].score - 1;
+                                console.log("Sammy " + a + " is trying a random warp");
+                            } else if (sammy[a].score > 2 && heatMap[sammy[a].row][sammy[a].col] > 20) {
+                                // Pass through
+                                switch(sammy[a].direction) {
+                                    case 1: arena[sammy[a].row - 1][sammy[a].col].acolor = 0; break;
+                                    case 2: arena[sammy[a].row + 1][sammy[a].col].acolor = 0; break;
+                                    case 3: arena[sammy[a].row][sammy[a].col - 1].acolor = 0; break;
+                                    case 4: arena[sammy[a].row][sammy[a].col + 1].acolor = 0; break;
                                 }
-                                break;
-                            case 4:
-                                if ( sammy[a].score > 2 ) {
-                                    switch(sammy[a].direction) {
-                                        case 1: arena[sammy[a].row - 1][sammy[a].col].acolor = 0; break;
-                                        case 2: arena[sammy[a].row + 1][sammy[a].col].acolor = 0; break;
-                                        case 3: arena[sammy[a].row][sammy[a].col - 1].acolor = 0; break;
-                                        case 4: arena[sammy[a].row][sammy[a].col + 1].acolor = 0; break;
-                                    }
-                                    sammy[a].score = sammy[a].score - 2;
-                                }
-                                break;
-                            case 5:
-                                let r = 0;
-                                if ( sammy[a].score > 3 ) {
-                                    for (let q = 1 ; q <= 8 ; q++) {
-                                        switch(sammy[a].direction) {
-                                            case 1: if ( arena[sammy[a].row - 1][sammy[a].col].acolor = colortable[q] ) { r = q; } break;
-                                            case 2: if ( arena[sammy[a].row + 1][sammy[a].col].acolor = colortable[q] ) { r = q; } break;
-                                            case 3: if ( arena[sammy[a].row][sammy[a].col - 1].acolor = colortable[q] ) { r = q; } break;
-                                            case 4: if ( arena[sammy[a].row][sammy[a].col + 1].acolor = colortable[q] ) { r = q; } break;
-                                        }
-                                    }
-                                    if ( r > 0 && r <= numPlayers ) {
-                                        eraseSnake(sammy, sammyBody, r);
-                                    }
-                                    r = 0;
-                                    sammy[a].score = sammy[a].score - 3;
-                                }
+                                sammy[a].score = sammy[a].score - 2;
+                                console.log("Sammy " + a + " is trying to pass through");
+                            }
                         }
                     }
                 }
@@ -1238,6 +1252,7 @@ function playNibbles({numPlayers, speed, comp}) {
                 if (sammy[a].col < 2) { sammy[a].col = 2; }
                 if (sammy[a].col > ARENAWIDTH - 1) { sammy[a].col = ARENAWIDTH - 1; }
 
+                // Bounce
                 if (pointIsThere(sammy[a].row, sammy[a].col, 0)) {
                     if (sammy[a].direction === 1) {
                         if (!pointIsThere(sammy[a].row + 1, sammy[a].col, 0)) {
