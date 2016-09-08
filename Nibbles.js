@@ -1042,10 +1042,10 @@ function playNibbles({numPlayers, speed, comp}) {
                     if (sammy[a] && sammy[a].score > 3 ) {
                         for (let q = 1 ; q <= numPlayers ; q++) {
                             switch(sammy[a].direction) {
-                                case 1: if ( arena[sammy[a].row - 1][sammy[a].col].acolor = colortable[q] ) { r = q; } break;
-                                case 2: if ( arena[sammy[a].row + 1][sammy[a].col].acolor = colortable[q] ) { r = q; } break;
-                                case 3: if ( arena[sammy[a].row][sammy[a].col - 1].acolor = colortable[q] ) { r = q; } break;
-                                case 4: if ( arena[sammy[a].row][sammy[a].col + 1].acolor = colortable[q] ) { r = q; } break;
+                                case 1: if ( arena[sammy[a].row - 1][sammy[a].col].acolor === colortable[q] ) { r = q; } break;
+                                case 2: if ( arena[sammy[a].row + 1][sammy[a].col].acolor === colortable[q] ) { r = q; } break;
+                                case 3: if ( arena[sammy[a].row][sammy[a].col - 1].acolor === colortable[q] ) { r = q; } break;
+                                case 4: if ( arena[sammy[a].row][sammy[a].col + 1].acolor === colortable[q] ) { r = q; } break;
                             }
                         }
                         if (r > 0 && r <= numPlayers) {
@@ -1217,10 +1217,10 @@ function playNibbles({numPlayers, speed, comp}) {
                                 if ( sammy[a].score > 3 ) {
                                     for (let q = 1 ; q <= 8 ; q++) {
                                         switch(sammy[a].direction) {
-                                            case 1: if ( arena[sammy[a].row - 1][sammy[a].col].acolor = colortable[q] ) { r = q; } break;
-                                            case 2: if ( arena[sammy[a].row + 1][sammy[a].col].acolor = colortable[q] ) { r = q; } break;
-                                            case 3: if ( arena[sammy[a].row][sammy[a].col - 1].acolor = colortable[q] ) { r = q; } break;
-                                            case 4: if ( arena[sammy[a].row][sammy[a].col + 1].acolor = colortable[q] ) { r = q; } break;
+                                            case 1: if ( arena[sammy[a].row - 1][sammy[a].col].acolor === colortable[q] ) { r = q; } break;
+                                            case 2: if ( arena[sammy[a].row + 1][sammy[a].col].acolor === colortable[q] ) { r = q; } break;
+                                            case 3: if ( arena[sammy[a].row][sammy[a].col - 1].acolor === colortable[q] ) { r = q; } break;
+                                            case 4: if ( arena[sammy[a].row][sammy[a].col + 1].acolor === colortable[q] ) { r = q; } break;
                                         }
                                     }
                                     if ( r > 0 && r <= numPlayers ) {
