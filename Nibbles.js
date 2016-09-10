@@ -160,11 +160,13 @@ const fonts = [
     "font-family:Courier New, monospace;line-height:normal;",
     "font-family:Lucida Console, monospace;line-height:0.999em;",
     ];
-document.body.style = `${fonts[2]};white-space:pre;letter-spacing:-0.008em;`;
+document.body.style = `${fonts[2]};white-space:pre;letter-spacing:-0.008em;display:inline-flex;`;
 document.addEventListener("keydown", keydown);
 
 const buffer = [];
 const screenBuffer = [];
+const heatMapBuffer = [];
+let displayHeatMap = false;
 
 /*
     Fills the buffer with specified character (ie clear screen)
@@ -188,7 +190,7 @@ function fillBuffer (fg, bg, c = S) {
 function drawBufferToScreen() {
     if(screenBuffer.length === 0) {
         // Populate the document body for the first time
-        let screenText = "";
+        let screenText = "<div>";
         for (let row = 1; row <= HEIGHT; row++) {
             screenText += "<div style='line-height:0'>";
             for (let col = 1; col <= WIDTH; col++) {
@@ -196,12 +198,13 @@ function drawBufferToScreen() {
             }
             screenText += "</div>\n";
         }
-        document.body.innerHTML = screenText;
+
+        document.body.innerHTML = screenText + "</div>\n<div style='transform: scale(1, 0.5);position: absolute;top: -37%;opacity: 0.5;display: block'></div>";
     } else {
         for (let row = 1; row <= HEIGHT; row++) {
             for (let col = 1; col <= WIDTH; col++) {
                 if (screenBuffer[row][col] !== buffer[row][col]) {
-                    let e = document.body.children[row-1].children[col-1];
+                    let e = document.body.children[0].children[row-1].children[col-1];
                     e.setAttribute("style",`color:rgb(${buffer[row][col].foreground});background:rgb(${buffer[row][col].background})`);
                     e.innerHTML = buffer[row][col].character;
                 }
@@ -212,6 +215,41 @@ function drawBufferToScreen() {
     // Update screenBuffer
     for (let row = 1 ; row <= HEIGHT ; row++) {
         screenBuffer[row] = Array.from(buffer[row]);
+    }
+}
+
+function drawHeatMapToScreen() {
+    if (displayHeatMap) {
+        document.body.children[1].setAttribute("style", document.body.children[1].getAttribute("style").replace(/display: none/,"display: block"));
+
+        if (heatMapBuffer.length === 0) {
+            // Populate the document body for the first time
+            let screenText = "";
+            for (let row = 1; row <= ARENAHEIGHT; row++) {
+                screenText += "<div style='line-height:0'>";
+                for (let col = 1; col <= ARENAWIDTH; col++) {
+                    screenText += `<span style="color:rgb(${heatMap[row][col]},${heatMap[row][col] === 255 ? 0 : 90 - heatMap[row][col]}, 0);background:rgb(0,0,0)">${B}</span>`;
+                }
+                screenText += "</div>\n";
+            }
+            document.body.children[1].innerHTML = screenText;
+        } else {
+            for (let row = 1; row <= ARENAHEIGHT; row++) {
+                for (let col = 1; col <= ARENAWIDTH; col++) {
+                    if (heatMapBuffer[row][col] !== heatMap[row][col]) {
+                        let e = document.body.children[1].children[row - 1].children[col - 1];
+                        e.setAttribute("style", `color:rgb(${heatMap[row][col]},${heatMap[row][col] === 0 ? 255 : 90 - heatMap[row][col]}, 0);background:rgb(0,0,0)`);
+                    }
+                }
+            }
+        }
+
+        // Update screenBuffer
+        for (let row = 1; row <= ARENAHEIGHT; row++) {
+            heatMapBuffer[row] = Array.from(heatMap[row]);
+        }
+    } else {
+        document.body.children[1].setAttribute("style", document.body.children[1].getAttribute("style").replace(/display: block/,"display: none"));
     }
 }
 
@@ -931,6 +969,19 @@ function pointIsThere2(row, col, c, d) {
     return false
 }
 
+
+function sortedIndex(array, value) {
+    var low = 0,
+        high = array.length;
+
+    while (low < high) {
+        var mid = (low + high) >>> 1;
+        if (array[mid].val < value.val) low = mid + 1;
+        else high = mid;
+    }
+    return low;
+}
+
 function clearHeatMap() {
     for (let row = 1; row <= ARENAHEIGHT; row++) {
         heatMap[row] = [];
@@ -938,21 +989,18 @@ function clearHeatMap() {
 }
 
 function buildHeatMap(heat, heatQueue) {
-    if(!heatQueue) { heatQueue = [heat]; heatMap[heat.row][heat.col] = {val: heat.val, visited: 1}}
+    if(!heatQueue) { heatQueue = [heat]; heatMap[heat.row][heat.col] = heat.val}
     const lookDirs = [{},{},{},{}];
     const lookDirRnd = Math.floor(Math.random() * lookDirs.length);
 
     function buildNext(row, col, val) {
         if(row > 0 && col > 0 && row <= ARENAHEIGHT && col <= ARENAWIDTH) {
-            let valAdd = 1;
-            if (arena[row][col].acolor === 7) { valAdd = 90; }         // Walls are hard to get through
-            else if (arena[row][col].acolor !== 0) { valAdd = 30; }     // Snakes, less so
-            if (heatMap[row][col] === undefined || (heatMap[row][col].visited < 15 && heatMap[row][col].val > val + valAdd)) {
-                heatMap[row][col] = {
-                    val: val + valAdd,
-                    visited: heatMap[row][col] && heatMap[row][col].visited && (heatMap[row][col].visited+1) || 1
-                };
-                return {row: row, col: col, val: val + valAdd};
+            if (heatMap[row][col] === undefined) {
+                let newVal = val + 1;
+                if (arena[row][col].acolor === 7) { newVal = val + 90; }          // Walls are hard to get through
+                else if (arena[row][col].acolor !== 0) { newVal = val + 30; }     // Snakes, less so
+                heatMap[row][col] = newVal;
+                return {row: row, col: col, val: newVal};
             }
         }
         return null;
@@ -964,7 +1012,10 @@ function buildHeatMap(heat, heatQueue) {
         lookDirs[((3 + lookDirRnd) % lookDirs.length)] = {row: row, col: col - 1};
 
         for (let lookDir = 0 ; lookDir < lookDirs.length ; lookDir++) {
-            heatQueue.push(buildNext(lookDirs[lookDir].row, lookDirs[lookDir].col, val));
+            let heat = buildNext(lookDirs[lookDir].row, lookDirs[lookDir].col, val);
+            if (heat !== null) {
+                heatQueue.splice(sortedIndex(heatQueue, heat), 0, heat);
+            }
         }
     }
 
@@ -978,7 +1029,6 @@ function buildHeatMap(heat, heatQueue) {
 
 function playNibbles({numPlayers, speed, comp}) {
     const CANDIESTOLEVELUP = 15;
-    let x = -1;
     const sammyBody =[];
     const sammy = [];
     for (let a = 1 ; a <= numPlayers ; a++) {
@@ -1037,8 +1087,11 @@ function playNibbles({numPlayers, speed, comp}) {
                 numberRow = arena[numberPlace.r][numberPlace.c].realRow;
                 numberCol = numberPlace.c;
                 nonum = false;
-                clearHeatMap();
-                buildHeatMap({row: candyRow, col: candyCol, val: 0});
+                if(comp > 0) {
+                    clearHeatMap();
+                    buildHeatMap({row: candyRow, col: candyCol, val: 0});
+                    drawHeatMapToScreen();
+                }
                 text(numberRow, numberCol, FG[Math.floor(Math.random() * 7) + 9], BG[0], "☼");
                 drawBufferToScreen();
             }
@@ -1062,6 +1115,9 @@ function playNibbles({numPlayers, speed, comp}) {
                 case "p": case "P": spacePause(" Game Paused ... Push Space  ", tick); return;
 
                 case " ": nonum = true; break;
+
+                case "`": displayHeatMap = !displayHeatMap;
+
                 case "q": case "Q": case "r": case "R": case "u": case "U":
                     switch(kbd) {
                         case "q": case "Q": a = 2; break;
@@ -1164,20 +1220,19 @@ function playNibbles({numPlayers, speed, comp}) {
                 text(1, q * 8, FG[sammy[q].scolor], BG[bg], "" + sammy[q].score);
             }
 
-            x++;
-            if(x > 10) {
+            if(comp > 0) {
                 clearHeatMap();
                 buildHeatMap({row: candyRow, col: candyCol, val: 0});
-                x = 0;
+                drawHeatMapToScreen();
             }
 
             for(let a = 1 ; a <= numPlayers ; a++) {
                 if (a > (numPlayers - comp)) { // AI
                     let possibleMoves = [];
-                    possibleMoves.push({direction: 1, gain: heatMap[sammy[a].row][sammy[a].col].val - heatMap[sammy[a].row - 1][sammy[a].col].val});
-                    possibleMoves.push({direction: 2, gain: heatMap[sammy[a].row][sammy[a].col].val - heatMap[sammy[a].row + 1][sammy[a].col].val});
-                    possibleMoves.push({direction: 3, gain: heatMap[sammy[a].row][sammy[a].col].val - heatMap[sammy[a].row][sammy[a].col - 1].val});
-                    possibleMoves.push({direction: 4, gain: heatMap[sammy[a].row][sammy[a].col].val - heatMap[sammy[a].row][sammy[a].col + 1].val});
+                    possibleMoves.push({direction: 1, gain: heatMap[sammy[a].row][sammy[a].col] - heatMap[sammy[a].row - 1][sammy[a].col]});
+                    possibleMoves.push({direction: 2, gain: heatMap[sammy[a].row][sammy[a].col] - heatMap[sammy[a].row + 1][sammy[a].col]});
+                    possibleMoves.push({direction: 3, gain: heatMap[sammy[a].row][sammy[a].col] - heatMap[sammy[a].row][sammy[a].col - 1]});
+                    possibleMoves.push({direction: 4, gain: heatMap[sammy[a].row][sammy[a].col] - heatMap[sammy[a].row][sammy[a].col + 1]});
                     let bestMove = {direction: 0, gain: 0};
                     let preferDir = sammy[a].direction;
                     for(let b = 0 ; b < possibleMoves.length ; b++) {
@@ -1249,7 +1304,7 @@ function playNibbles({numPlayers, speed, comp}) {
             for(let a = 1 ; a <= numPlayers ; a++) {
                 if (a > (numPlayers - comp)) {  // AI Special Moves.
 
-                    if (sammy[a].score > (5 * useSpecialPointMultiplier) && heatMap[sammy[a].row][sammy[a].col].val > 150) {
+                    if (sammy[a].score > (5 * useSpecialPointMultiplier) && heatMap[sammy[a].row][sammy[a].col] > 150) {
                         // We're beyond the edge of the map. Try a warp-near
                         sammy[a].row = candyRow + Math.floor(Math.random() * 2) + 1;
                         sammy[a].col = candyCol + Math.floor(Math.random() * 2) + 1;
@@ -1280,13 +1335,13 @@ function playNibbles({numPlayers, speed, comp}) {
                             case 4: if(pointIsThere(sammy[a].row, sammy[a].col + 1, 0)) { somethingIsInTheWay = true; } break;
                         }
                         if(somethingIsInTheWay && (Math.random() < 0.2)) {
-                            if (sammy[a].score > (1 * useSpecialPointMultiplier) && heatMap[sammy[a].row][sammy[a].col].val > 60) {
+                            if (sammy[a].score > (1 * useSpecialPointMultiplier) && heatMap[sammy[a].row][sammy[a].col] > 60) {
                                 // Random Warp
                                 sammy[a].row = Math.floor(Math.random() * 40) + 4;
                                 sammy[a].col = Math.floor(Math.random() * 77) + 2;
                                 sammy[a].direction = Math.floor(Math.random() * 4) + 1;
                                 sammy[a].score = sammy[a].score - 1;
-                            } else if (sammy[a].score > (2 * useSpecialPointMultiplier) && heatMap[sammy[a].row][sammy[a].col].val > 20) {
+                            } else if (sammy[a].score > (2 * useSpecialPointMultiplier) && heatMap[sammy[a].row][sammy[a].col] > 20) {
                                 // Pass through
                                 switch(sammy[a].direction) {
                                     case 1: arena[sammy[a].row - 1][sammy[a].col].acolor = 0; break;
