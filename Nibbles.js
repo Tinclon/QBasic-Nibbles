@@ -199,7 +199,10 @@ function drawBufferToScreen() {
             screenText += "</div>\n";
         }
 
-        document.body.innerHTML = screenText + "</div>\n<div style='transform: scale(1, 0.5) translateY(-51%);position: absolute;opacity: 0.5;display: block'></div>";
+        document.body.innerHTML = screenText + "</div>\n" +
+            "<div style='transform: scale(1, 0.5) translateY(-51%);position: absolute;opacity: 0.75;display: block'></div>" +
+            "<div style='background-color: opacity: 0;position: fixed;top: 0; left: 0; width: 100%; height: 100%; display: block'></div>";
+
     } else {
         for (let row = 1; row <= HEIGHT; row++) {
             for (let col = 1; col <= WIDTH; col++) {
@@ -991,7 +994,6 @@ function clearHeatMap() {
 function buildHeatMap(heat, heatQueue) {
     if(!heatQueue) { heatQueue = [heat]; heatMap[heat.row][heat.col] = heat.val}
     const lookDirs = [{},{},{},{}];
-    const lookDirRnd = Math.floor(Math.random() * lookDirs.length);
 
     function buildNext(row, col, val) {
         if(row > 0 && col > 0 && row <= ARENAHEIGHT && col <= ARENAWIDTH) {
@@ -1006,10 +1008,10 @@ function buildHeatMap(heat, heatQueue) {
         return null;
     }
     function lookAround(heatQueue, row, col, val) {
-        lookDirs[((0 + lookDirRnd) % lookDirs.length)] = {row: row + 1, col: col};
-        lookDirs[((1 + lookDirRnd) % lookDirs.length)] = {row: row - 1, col: col};
-        lookDirs[((2 + lookDirRnd) % lookDirs.length)] = {row: row, col: col + 1};
-        lookDirs[((3 + lookDirRnd) % lookDirs.length)] = {row: row, col: col - 1};
+        lookDirs[0] = {row: row + 1, col: col};
+        lookDirs[1] = {row: row - 1, col: col};
+        lookDirs[2] = {row: row, col: col + 1};
+        lookDirs[3] = {row: row, col: col - 1};
 
         for (let lookDir = 0 ; lookDir < lookDirs.length ; lookDir++) {
             let heat = buildNext(lookDirs[lookDir].row, lookDirs[lookDir].col, val);
@@ -1114,7 +1116,7 @@ function playNibbles({numPlayers, speed, comp}) {
 
                 case "p": case "P": spacePause(" Game Paused ... Push Space  ", tick); return;
 
-                case " ": nonum = true; break;
+                case "\\": nonum = true; break;
 
                 case "`": displayHeatMap = !displayHeatMap;
 
