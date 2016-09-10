@@ -190,7 +190,8 @@ function fillBuffer (fg, bg, c = S) {
 function drawBufferToScreen() {
     if(screenBuffer.length === 0) {
         // Populate the document body for the first time
-        let screenText = "<div>";
+        let screenText = "<div style='z-index: 0;background-color: black;position: fixed;top: 0; left: 0; width: 100%; height: 100%; display: block'></div>" +
+            "<div style='z-index: 1;transform: translate(50%, 25%);'>";
         for (let row = 1; row <= HEIGHT; row++) {
             screenText += "<div style='line-height:0'>";
             for (let col = 1; col <= WIDTH; col++) {
@@ -200,14 +201,14 @@ function drawBufferToScreen() {
         }
 
         document.body.innerHTML = screenText + "</div>\n" +
-            "<div style='transform: scale(1, 0.5) translateY(-51%);position: absolute;opacity: 0.75;display: block'></div>" +
-            "<div style='background-color: opacity: 0;position: fixed;top: 0; left: 0; width: 100%; height: 100%; display: block'></div>";
+            "<div style='z-index: 2;transform: scale(1, 0.5) translate(50%,-26%);position: absolute;opacity: 0.75;display: block'></div>" +
+            "<div style='z-index: 3;opacity: 0;position: fixed;top: 0; left: 0; width: 100%; height: 100%; display: block'></div>";
 
     } else {
         for (let row = 1; row <= HEIGHT; row++) {
             for (let col = 1; col <= WIDTH; col++) {
                 if (screenBuffer[row][col] !== buffer[row][col]) {
-                    let e = document.body.children[0].children[row-1].children[col-1];
+                    let e = document.body.children[1].children[row-1].children[col-1];
                     e.setAttribute("style",`color:rgb(${buffer[row][col].foreground});background:rgb(${buffer[row][col].background})`);
                     e.innerHTML = buffer[row][col].character;
                 }
@@ -223,7 +224,7 @@ function drawBufferToScreen() {
 
 function drawHeatMapToScreen() {
     if (displayHeatMap) {
-        document.body.children[1].setAttribute("style", document.body.children[1].getAttribute("style").replace(/display: none/,"display: block"));
+        document.body.children[2].setAttribute("style", document.body.children[2].getAttribute("style").replace(/display: none/,"display: block"));
 
         if (heatMapBuffer.length === 0) {
             // Populate the document body for the first time
@@ -235,12 +236,12 @@ function drawHeatMapToScreen() {
                 }
                 screenText += "</div>\n";
             }
-            document.body.children[1].innerHTML = screenText;
+            document.body.children[2].innerHTML = screenText;
         } else {
             for (let row = 1; row <= ARENAHEIGHT; row++) {
                 for (let col = 1; col <= ARENAWIDTH; col++) {
                     if (heatMapBuffer[row][col] !== heatMap[row][col]) {
-                        let e = document.body.children[1].children[row - 1].children[col - 1];
+                        let e = document.body.children[2].children[row - 1].children[col - 1];
                         e.setAttribute("style", `color:rgb(${heatMap[row][col]},${heatMap[row][col] === 0 ? 255 : 90 - heatMap[row][col]}, 0);background:rgb(0,0,0)`);
                     }
                 }
@@ -252,7 +253,7 @@ function drawHeatMapToScreen() {
             heatMapBuffer[row] = Array.from(heatMap[row]);
         }
     } else {
-        document.body.children[1].setAttribute("style", document.body.children[1].getAttribute("style").replace(/display: block/,"display: none"));
+        document.body.children[2].setAttribute("style", document.body.children[2].getAttribute("style").replace(/display: block/,"display: none"));
     }
 }
 
