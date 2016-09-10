@@ -952,10 +952,16 @@ function buildHeatMap(heat, heatQueue) {
         return null;
     }
     function lookAround(heatQueue, heat) {
-        heatQueue.push(buildNext(heat.row + 1, heat.col, heat.val));
-        heatQueue.push(buildNext(heat.row - 1, heat.col, heat.val));
-        heatQueue.push(buildNext(heat.row, heat.col + 1, heat.val));
-        heatQueue.push(buildNext(heat.row, heat.col - 1, heat.val));
+        let lookDirs = [];
+        lookDirs.push({row: heat.row + 1, col: heat.col});
+        lookDirs.push({row: heat.row - 1, col: heat.col});
+        lookDirs.push({row: heat.row, col: heat.col + 1});
+        lookDirs.push({row: heat.row, col: heat.col - 1});
+        let lookDirRnd = Math.floor(Math.random() * lookDirs.length);
+        for (let lookDir = 0 ; lookDir < lookDirs.length ; lookDir++) {
+            let lookDirIndex = ((lookDir + lookDirRnd) % lookDirs.length);
+            heatQueue.push(buildNext(lookDirs[lookDirIndex].row, lookDirs[lookDirIndex].col, heat.val));
+        }
     }
 
     while(heatQueue.length > 0) {
@@ -1164,11 +1170,22 @@ function playNibbles({numPlayers, speed, comp}) {
             for(let a = 1 ; a <= numPlayers ; a++) {
                 if (a > (numPlayers - comp)) { // AI
                     let possibleMoves = [];
-                    if(heatMap[sammy[a].row - 1][sammy[a].col] < heatMap[sammy[a].row][sammy[a].col]) { possibleMoves.push(1); }
-                    if(heatMap[sammy[a].row + 1][sammy[a].col] < heatMap[sammy[a].row][sammy[a].col]) { possibleMoves.push(2); }
-                    if(heatMap[sammy[a].row][sammy[a].col - 1] < heatMap[sammy[a].row][sammy[a].col]) { possibleMoves.push(3); }
-                    if(heatMap[sammy[a].row][sammy[a].col + 1] < heatMap[sammy[a].row][sammy[a].col]) { possibleMoves.push(4); }
-                    sammy[a].direction = possibleMoves[Math.floor(Math.random() * possibleMoves.length)];
+                    possibleMoves.push({direction: 1, gain: heatMap[sammy[a].row][sammy[a].col] - heatMap[sammy[a].row - 1][sammy[a].col]});
+                    possibleMoves.push({direction: 2, gain: heatMap[sammy[a].row][sammy[a].col] - heatMap[sammy[a].row + 1][sammy[a].col]});
+                    possibleMoves.push({direction: 3, gain: heatMap[sammy[a].row][sammy[a].col] - heatMap[sammy[a].row][sammy[a].col - 1]});
+                    possibleMoves.push({direction: 4, gain: heatMap[sammy[a].row][sammy[a].col] - heatMap[sammy[a].row][sammy[a].col + 1]});
+                    let bestMove = {direction: 0, gain: 0};
+                    let dirRnd = Math.floor(Math.random() * possibleMoves.length);
+                    for(let b = 0 ; b < possibleMoves.length ; b++) {
+                        let dirIndex = ((b + dirRnd) % possibleMoves.length);
+                        if (possibleMoves[dirIndex].gain >= bestMove.gain) {
+                            bestMove.direction = possibleMoves[dirIndex].direction;
+                            bestMove.gain = possibleMoves[dirIndex].gain;
+                        }
+                    }
+                    if (bestMove.direction !== 0) {
+                        sammy[a].direction = bestMove.direction;
+                    }
                 }
 
                 switch (sammy[a].direction) {
