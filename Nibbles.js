@@ -199,7 +199,7 @@ function drawBufferToScreen() {
             screenText += "</div>\n";
         }
 
-        document.body.innerHTML = screenText + "</div>\n<div style='transform: scale(1, 0.5);position: absolute;top: -37%;opacity: 0.5;display: block'></div>";
+        document.body.innerHTML = screenText + "</div>\n<div style='transform: scale(1, 0.5) translateY(-51%);position: absolute;opacity: 0.5;display: block'></div>";
     } else {
         for (let row = 1; row <= HEIGHT; row++) {
             for (let col = 1; col <= WIDTH; col++) {
