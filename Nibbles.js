@@ -1175,9 +1175,9 @@ function playNibbles({numPlayers, speed, comp}) {
                     possibleMoves.push({direction: 3, gain: heatMap[sammy[a].row][sammy[a].col] - heatMap[sammy[a].row][sammy[a].col - 1]});
                     possibleMoves.push({direction: 4, gain: heatMap[sammy[a].row][sammy[a].col] - heatMap[sammy[a].row][sammy[a].col + 1]});
                     let bestMove = {direction: 0, gain: 0};
-                    let dirRnd = Math.floor(Math.random() * possibleMoves.length);
+                    let preferDir = sammy[a].direction;
                     for(let b = 0 ; b < possibleMoves.length ; b++) {
-                        let dirIndex = ((b + dirRnd) % possibleMoves.length);
+                        let dirIndex = ((b + preferDir) % possibleMoves.length);
                         if (possibleMoves[dirIndex].gain >= bestMove.gain) {
                             bestMove.direction = possibleMoves[dirIndex].direction;
                             bestMove.gain = possibleMoves[dirIndex].gain;
