@@ -938,36 +938,40 @@ function clearHeatMap() {
 }
 
 function buildHeatMap(heat, heatQueue) {
-    if(!heatQueue) { heatQueue = [heat]; heatMap[heat.row][heat.col] = heat.val}
+    if(!heatQueue) { heatQueue = [heat]; heatMap[heat.row][heat.col] = {val: heat.val, visited: 1}}
+    const lookDirs = [{},{},{},{}];
+    const lookDirRnd = Math.floor(Math.random() * lookDirs.length);
+
     function buildNext(row, col, val) {
         if(row > 0 && col > 0 && row <= ARENAHEIGHT && col <= ARENAWIDTH) {
             let valAdd = 1;
-            if (arena[row][col].acolor === 7) { valAdd = 75; }         // Walls are hard to get through
-            else if (arena[row][col].acolor !== 0) { valAdd = 25; }     // Snakes, less so
-            if (heatMap[row][col] === undefined || heatMap[row][col] > val + valAdd) {
-                heatMap[row][col] = val + valAdd;
+            if (arena[row][col].acolor === 7) { valAdd = 90; }         // Walls are hard to get through
+            else if (arena[row][col].acolor !== 0) { valAdd = 30; }     // Snakes, less so
+            if (heatMap[row][col] === undefined || (heatMap[row][col].visited < 15 && heatMap[row][col].val > val + valAdd)) {
+                heatMap[row][col] = {
+                    val: val + valAdd,
+                    visited: heatMap[row][col] && heatMap[row][col].visited && (heatMap[row][col].visited+1) || 1
+                };
                 return {row: row, col: col, val: val + valAdd};
             }
         }
         return null;
     }
-    function lookAround(heatQueue, heat) {
-        let lookDirs = [];
-        lookDirs.push({row: heat.row + 1, col: heat.col});
-        lookDirs.push({row: heat.row - 1, col: heat.col});
-        lookDirs.push({row: heat.row, col: heat.col + 1});
-        lookDirs.push({row: heat.row, col: heat.col - 1});
-        let lookDirRnd = Math.floor(Math.random() * lookDirs.length);
+    function lookAround(heatQueue, row, col, val) {
+        lookDirs[((0 + lookDirRnd) % lookDirs.length)] = {row: row + 1, col: col};
+        lookDirs[((1 + lookDirRnd) % lookDirs.length)] = {row: row - 1, col: col};
+        lookDirs[((2 + lookDirRnd) % lookDirs.length)] = {row: row, col: col + 1};
+        lookDirs[((3 + lookDirRnd) % lookDirs.length)] = {row: row, col: col - 1};
+
         for (let lookDir = 0 ; lookDir < lookDirs.length ; lookDir++) {
-            let lookDirIndex = ((lookDir + lookDirRnd) % lookDirs.length);
-            heatQueue.push(buildNext(lookDirs[lookDirIndex].row, lookDirs[lookDirIndex].col, heat.val));
+            heatQueue.push(buildNext(lookDirs[lookDir].row, lookDirs[lookDir].col, val));
         }
     }
 
     while(heatQueue.length > 0) {
         heat = heatQueue.shift();
         if(heat !== null) {
-            lookAround(heatQueue, heat);
+            lookAround(heatQueue, heat.row, heat.col, heat.val);
         }
     }
 }
@@ -1170,10 +1174,10 @@ function playNibbles({numPlayers, speed, comp}) {
             for(let a = 1 ; a <= numPlayers ; a++) {
                 if (a > (numPlayers - comp)) { // AI
                     let possibleMoves = [];
-                    possibleMoves.push({direction: 1, gain: heatMap[sammy[a].row][sammy[a].col] - heatMap[sammy[a].row - 1][sammy[a].col]});
-                    possibleMoves.push({direction: 2, gain: heatMap[sammy[a].row][sammy[a].col] - heatMap[sammy[a].row + 1][sammy[a].col]});
-                    possibleMoves.push({direction: 3, gain: heatMap[sammy[a].row][sammy[a].col] - heatMap[sammy[a].row][sammy[a].col - 1]});
-                    possibleMoves.push({direction: 4, gain: heatMap[sammy[a].row][sammy[a].col] - heatMap[sammy[a].row][sammy[a].col + 1]});
+                    possibleMoves.push({direction: 1, gain: heatMap[sammy[a].row][sammy[a].col].val - heatMap[sammy[a].row - 1][sammy[a].col].val});
+                    possibleMoves.push({direction: 2, gain: heatMap[sammy[a].row][sammy[a].col].val - heatMap[sammy[a].row + 1][sammy[a].col].val});
+                    possibleMoves.push({direction: 3, gain: heatMap[sammy[a].row][sammy[a].col].val - heatMap[sammy[a].row][sammy[a].col - 1].val});
+                    possibleMoves.push({direction: 4, gain: heatMap[sammy[a].row][sammy[a].col].val - heatMap[sammy[a].row][sammy[a].col + 1].val});
                     let bestMove = {direction: 0, gain: 0};
                     let preferDir = sammy[a].direction;
                     for(let b = 0 ; b < possibleMoves.length ; b++) {
@@ -1245,7 +1249,7 @@ function playNibbles({numPlayers, speed, comp}) {
             for(let a = 1 ; a <= numPlayers ; a++) {
                 if (a > (numPlayers - comp)) {  // AI Special Moves.
 
-                    if (sammy[a].score > (5 * useSpecialPointMultiplier) && heatMap[sammy[a].row][sammy[a].col] > 150) {
+                    if (sammy[a].score > (5 * useSpecialPointMultiplier) && heatMap[sammy[a].row][sammy[a].col].val > 150) {
                         // We're beyond the edge of the map. Try a warp-near
                         sammy[a].row = candyRow + Math.floor(Math.random() * 2) + 1;
                         sammy[a].col = candyCol + Math.floor(Math.random() * 2) + 1;
@@ -1276,13 +1280,13 @@ function playNibbles({numPlayers, speed, comp}) {
                             case 4: if(pointIsThere(sammy[a].row, sammy[a].col + 1, 0)) { somethingIsInTheWay = true; } break;
                         }
                         if(somethingIsInTheWay && (Math.random() < 0.2)) {
-                            if (sammy[a].score > (1 * useSpecialPointMultiplier) && heatMap[sammy[a].row][sammy[a].col] > 60) {
+                            if (sammy[a].score > (1 * useSpecialPointMultiplier) && heatMap[sammy[a].row][sammy[a].col].val > 60) {
                                 // Random Warp
                                 sammy[a].row = Math.floor(Math.random() * 40) + 4;
                                 sammy[a].col = Math.floor(Math.random() * 77) + 2;
                                 sammy[a].direction = Math.floor(Math.random() * 4) + 1;
                                 sammy[a].score = sammy[a].score - 1;
-                            } else if (sammy[a].score > (2 * useSpecialPointMultiplier) && heatMap[sammy[a].row][sammy[a].col] > 20) {
+                            } else if (sammy[a].score > (2 * useSpecialPointMultiplier) && heatMap[sammy[a].row][sammy[a].col].val > 20) {
                                 // Pass through
                                 switch(sammy[a].direction) {
                                     case 1: arena[sammy[a].row - 1][sammy[a].col].acolor = 0; break;
