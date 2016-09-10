@@ -1023,9 +1023,7 @@ function buildHeatMap(heat, heatQueue) {
 
     while(heatQueue.length > 0) {
         heat = heatQueue.shift();
-        if(heat !== null) {
-            lookAround(heatQueue, heat.row, heat.col, heat.val);
-        }
+        lookAround(heatQueue, heat.row, heat.col, heat.val);
     }
 }
 
