@@ -167,6 +167,7 @@ const buffer = [];
 const screenBuffer = [];
 const heatMapBuffer = [];
 let displayHeatMap = false;
+let displaySnakeHead = false;
 
 /*
     Fills the buffer with specified character (ie clear screen)
@@ -299,7 +300,7 @@ function text (row, col, fg, bg, text) {
 /*
     Sets the arena's row and col to the given color index
  */
-function set (row, col, acolor) {
+function set (row, col, acolor, head) {
     if (row !== 0) {
         arena[row][col].acolor = acolor;
         const realRow = arena[row][col].realRow;
@@ -307,6 +308,8 @@ function set (row, col, acolor) {
 
         const sisterRow = row + arena[row][col].sister;
         const sisterColor = arena[sisterRow][col].acolor;
+
+        const hcolor = displaySnakeHead ? ((acolor - 6) % 8) + 8 : acolor;
 
         if (acolor === sisterColor) {
             buffer[realRow][col] = {
@@ -319,9 +322,10 @@ function set (row, col, acolor) {
                 if (acolor > 7) {
                     buffer[realRow][col] = {
                         character: U,
-                        foreground: FG[acolor],
+                        foreground: head ? FG[hcolor] : FG[acolor],
                         background: FG[sisterColor]
                     };
+                    if (head) { arena[row][col].acolor = hcolor; }
                 } else {
                     buffer[realRow][col] = {
                         character: L,
@@ -333,9 +337,10 @@ function set (row, col, acolor) {
                 if (acolor > 7) {
                     buffer[realRow][col] = {
                         character: L,
-                        foreground: FG[acolor],
+                        foreground: head ? FG[hcolor] : FG[acolor],
                         background: FG[sisterColor]
                     };
+                    if (head) { arena[row][col].acolor = hcolor; }
                 } else {
                     buffer[realRow][col] = {
                         character: U,
@@ -1117,7 +1122,8 @@ function playNibbles({numPlayers, speed, comp}) {
 
                 case "\\": nonum = true; break;
 
-                case "`": displayHeatMap = !displayHeatMap;
+                case "`": displayHeatMap = !displayHeatMap; break;
+                case "=": displaySnakeHead = !displaySnakeHead; break;
 
                 case "q": case "Q": case "r": case "R": case "u": case "U":
                     switch(kbd) {
@@ -1259,7 +1265,7 @@ function playNibbles({numPlayers, speed, comp}) {
                     // Candy hit. Yum.
 
                     if (sammy[a].length < (MAXSNAKELENGTH - 500)) {
-                        sammy[a].length = sammy[a].length + number * (numPlayers * 5);
+                        sammy[a].length = sammy[a].length + (number * 4) * (Math.floor(numPlayers / 4) + 1);
                         sammy[a].scolor = colortable[a];
                         for (let b = 1 ; b <= numPlayers ; b++) {
                             sammy[b].wall = 0;
@@ -1388,7 +1394,12 @@ function playNibbles({numPlayers, speed, comp}) {
                 let tail = (sammy[a].head + MAXSNAKELENGTH - sammy[a].length) % MAXSNAKELENGTH;
                 set(sammyBody[a][tail].row, sammyBody[a][tail].col, 0);
                 sammyBody[a][tail].row = 0;
-                set(sammy[a].row, sammy[a].col, sammy[a].scolor);
+
+                set(sammy[a].row, sammy[a].col, sammy[a].scolor, true);
+
+                let neck = (sammy[a].head - 1) % MAXSNAKELENGTH;
+                set(sammyBody[a][neck].row, sammyBody[a][neck].col, sammy[a].scolor);
+
             }
             drawBufferToScreen();
 
