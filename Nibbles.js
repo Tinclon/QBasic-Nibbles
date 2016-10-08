@@ -1033,7 +1033,7 @@ function buildHeatMap(heat, heatQueue) {
     }
 }
 
-function playNibbles({numPlayers, speed, comp}) {
+function playNibbles({auto, numPlayers, speed, comp}) {
     const CANDIESTOLEVELUP = 15;
     const sammyBody =[];
     const sammy = [];
@@ -1293,6 +1293,13 @@ function playNibbles({numPlayers, speed, comp}) {
                         for (let b = 1 ; b <= numPlayers ; b++) {
                             eraseSnake(sammy, sammyBody, b);
                         }
+                        if(auto && curlevel >= 25) {
+                            curlevel = 0;
+                            speed += ((2 * 25) - 5);
+                            for (let b = 1 ; b <= numPlayers ; b++) {
+                                sammy[b].score = sammy[b].score >> 3;
+                            }
+                        }
                         curlevel = level(NEXTLEVEL, curlevel, comp, numPlayers, sammy);
                         speed = speed - 2;
                         if (numPlayers === comp) {
@@ -1431,12 +1438,24 @@ function playNibbles({numPlayers, speed, comp}) {
         tick(finishPlay);
     }
 
-    spacePause(`     Level ${curlevel},  Push Space`, play);
+    if(auto) {
+        play();
+    } else {
+        spacePause(`     Level ${curlevel},  Push Space`, play);
+    }
 }
 
 
-function intro() {
+function intro(auto) {
+
     fillBuffer(FG[15], BG[0]);
+
+    if(auto) {
+        drawBufferToScreen();
+        drawScreen();
+        playNibbles({auto: true, numPlayers: 4, speed: 75, comp: 4});
+        return;
+    }
 
     center(3, FG[15], BG[0], "Q B a s i c   N i b b l e s");
     center(7, FG[7], BG[0], "Nibbles is a game for one to eight players.  Navigate your snakes");
@@ -1472,7 +1491,5 @@ function intro() {
         })
     });
 }
-
-intro();
 
 
