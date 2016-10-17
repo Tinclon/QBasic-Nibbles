@@ -1085,7 +1085,7 @@ function playNibbles({auto, numPlayers, speed, comp}) {
                     };
                 }
                 let numberPlace = placeNumber();
-                while(pointIsThere(numberPlace.r, numberPlace.c, 0) || pointIsThere(numberPlace.s, numberPlace.c, 0)) {
+                while(pointIsThere(numberPlace.r, numberPlace.c, 0) /*|| pointIsThere(numberPlace.s, numberPlace.c, 0)*/) {
                     numberPlace = placeNumber();
                 }
                 candyCol = numberPlace.c;
@@ -1404,7 +1404,7 @@ function playNibbles({auto, numPlayers, speed, comp}) {
 
                 set(sammy[a].row, sammy[a].col, sammy[a].scolor, true);
 
-                let neck = (sammy[a].head - 1) % MAXSNAKELENGTH;
+                let neck = (sammy[a].head + (MAXSNAKELENGTH - 1)) % MAXSNAKELENGTH;
                 set(sammyBody[a][neck].row, sammyBody[a][neck].col, sammy[a].scolor);
 
             }
