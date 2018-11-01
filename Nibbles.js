@@ -155,12 +155,6 @@ function keydown(e) {
     keyboardQueue.push(e.key);
 }
 
-const fonts = [
-    "font-family:Andale Mono, monospace;line-height:normal;",
-    "font-family:Courier New, monospace;line-height:normal;",
-    "font-family:Lucida Console, monospace;line-height:0.999em;",
-    ];
-document.body.style = `${fonts[2]};white-space:pre;letter-spacing:-0.008em;display:inline-flex;`;
 document.addEventListener("keydown", keydown);
 
 const buffer = [];
@@ -191,10 +185,10 @@ function fillBuffer (fg, bg, c = S) {
 function drawBufferToScreen() {
     if(screenBuffer.length === 0) {
         // Populate the document body for the first time
-        let screenText = "<div style='z-index: 0;background-color: black;position: fixed;top: 0; left: 0; width: 100%; height: 100%; display: block'></div>" +
-            "<div style='z-index: 1;transform: translate(50%, 25%);'>";
+        let screenText = "<div class='background'></div>" +
+            "<div class='board'>";
         for (let row = 1; row <= HEIGHT; row++) {
-            screenText += "<div style='line-height:0'>";
+            screenText += "<div class='textCell'>";
             for (let col = 1; col <= WIDTH; col++) {
                 screenText += `<span style="color:rgb(${buffer[row][col].foreground});background:rgb(${buffer[row][col].background})">${buffer[row][col].character}</span>`;
             }
@@ -202,8 +196,8 @@ function drawBufferToScreen() {
         }
 
         document.body.innerHTML = screenText + "</div>\n" +
-            "<div style='z-index: 2;transform: scale(1, 0.5) translate(50%,-26%);position: absolute;opacity: 0.75;display: block'></div>" +
-            "<div style='z-index: 3;opacity: 0;position: fixed;top: 0; left: 0; width: 100%; height: 100%; display: block'></div>";
+            "<div class='overlay1' style='display: block;'></div>" +
+            "<div class='overlay2' style='display: block;'></div>";
 
     } else {
         for (let row = 1; row <= HEIGHT; row++) {
@@ -231,7 +225,7 @@ function drawHeatMapToScreen() {
             // Populate the document body for the first time
             let screenText = "";
             for (let row = 1; row <= ARENAHEIGHT; row++) {
-                screenText += "<div style='line-height:0'>";
+                screenText += "<div class='textCell'>";
                 for (let col = 1; col <= ARENAWIDTH; col++) {
                     screenText += `<span style="color:rgb(${heatMap[row][col]},${heatMap[row][col] === 255 ? 0 : 90 - heatMap[row][col]}, 0);background:rgb(0,0,0)">${B}</span>`;
                 }
@@ -285,6 +279,37 @@ function center (row, fg, bg, text) {
 }
 
 /*
+     Centers the specified text, in the given color, to the specified row in the buffer.
+ */
+function centerWithBorder (row, bfg, bbg, btext, fg, bg, text) {
+    const x = (WIDTH >> 1) - ((text.length + btext.length) >> 1);
+    let i = 0;
+    for (; i < btext.length ; i++) {
+		buffer[row][x+i] = {
+				character: btext[i],
+				foreground: bfg,
+				background: bbg
+		};
+    }
+    for (; i < text.length + btext.length ; i++) {
+        buffer[row][x+i] = {
+            character: text[i - btext.length],
+            foreground: fg,
+            background: bg
+        };
+    }
+    for (; i < text.length + btext.length + btext.length ; i++) {
+		buffer[row][x+i] = {
+				character: btext[i - text.length - btext.length],
+				foreground: bfg,
+				background: bbg
+		};
+    }    
+}
+
+
+
+/*
     Populates the given text to the buffer at the row, col, and color provided.
  */
 function text (row, col, fg, bg, text) {
@@ -321,9 +346,9 @@ function set (row, col, acolor, head) {
             if (topFlag) {
                 if (acolor > 7) {
                     buffer[realRow][col] = {
-                        character: U,
-                        foreground: head ? FG[hcolor] : FG[acolor],
-                        background: FG[sisterColor]
+                        character: L,
+                        background: head ? FG[hcolor] : FG[acolor],
+                        foreground: FG[sisterColor]
                     };
                     if (head) { arena[row][col].acolor = hcolor; }
                 } else {
@@ -343,9 +368,9 @@ function set (row, col, acolor, head) {
                     if (head) { arena[row][col].acolor = hcolor; }
                 } else {
                     buffer[realRow][col] = {
-                        character: U,
-                        foreground: FG[sisterColor],
-                        background: FG[acolor]
+                        character: L,
+                        background: FG[sisterColor],
+                        foreground: FG[acolor]
                     };
                 }
             }
@@ -355,8 +380,8 @@ function set (row, col, acolor, head) {
 
 function spacePause(text, next) {
     center(11, FG[15], BG[4], "█▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀█");
-    center(12, FG[15], BG[4], `█ ${(text + "                             ").substring(0,29)} █`);
-    center(13, FG[15], BG[4], "█▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄█");
+	centerWithBorder(12, FG[15], BG[15], "█", FG[15], BG[4], ` ${(text + "                             ").substring(0,29)} `);
+    centerWithBorder(13, FG[15], BG[15], "█", FG[15], BG[4], "▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄");
     drawBufferToScreen();
 
     function restoreArena() {
