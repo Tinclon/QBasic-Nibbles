@@ -1,0 +1,48 @@
+body {
+	font-family: "DejaVu Sans Mono","SFMono-Regular",Consolas,"Liberation Mono",Menlo,Courier,monospace;
+    /*font-family: Andale Mono, monospace;line-height:normal;*/
+    /*font-family: Courier New, monospace;line-height:normal;*/
+    /*font-family: Lucida Console, monospace;line-height:0.999em;*/
+    
+	white-space: pre;
+	/*letter-spacing: -0.008em;*/
+	display: inline-flex;  
+	line-height: 0.6;  
+}
+
+.background {
+	z-index: 0;
+	background-color: black;
+	position: fixed;
+	top: 0; 
+	left: 0; 
+	width: 100%; 
+	height: 100%; 
+	display: block
+}
+
+.board {
+	z-index: 1;
+	transform: translate(50%, 25%);
+}
+
+.textCell {
+	/*line-height: 0;*/
+}
+
+.overlay1 {
+	z-index: 2;
+	transform: scale(1, 0.5) translate(50%,-26%);
+	position: absolute;
+	opacity: 0.75;
+}
+
+.overlay2 {
+	z-index: 3;
+	opacity: 0;
+	position: fixed;
+	top: 0; 
+	left: 0; 
+	width: 100%; 
+	height: 100%;
+}
